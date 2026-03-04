@@ -45,13 +45,20 @@ resolve_tag() {
     return
   fi
 
-  local api response tag
-  api="https://api.github.com/repos/${REPO}/releases?per_page=20"
-  response="$(curl -fsSL "$api")"
+  local api_latest api_all response tag
+  api_latest="https://api.github.com/repos/${REPO}/releases/latest"
+  api_all="https://api.github.com/repos/${REPO}/releases?per_page=20"
+
+  response="$(curl -fsSL "$api_latest" 2>/dev/null || true)"
   tag="$(printf '%s\n' "$response" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
 
   if [ -z "$tag" ]; then
-    fail "unable to resolve latest release tag from ${api}; set PLEASE_VERSION explicitly"
+    response="$(curl -fsSL "$api_all")"
+    tag="$(printf '%s\n' "$response" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  fi
+
+  if [ -z "$tag" ]; then
+    fail "unable to resolve latest release tag from GitHub API; set PLEASE_VERSION explicitly"
   fi
 
   echo "$tag"

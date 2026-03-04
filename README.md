@@ -3,7 +3,7 @@
 `Please` is a deterministic task runner for polyglot projects with explicit task contracts (`inputs`, `outputs`, `deps`, `env`, `run`).
 
 ## Status
-Current release: **`v0.2.0`**.
+Current public prerelease: **`v0.2.0-beta.1`**.
 
 ## Why Please
 - Content-hash invalidation (BLAKE3), not mtime heuristics.
@@ -17,22 +17,22 @@ Supported binaries:
 - `x86_64-unknown-linux-gnu`
 - `aarch64-apple-darwin`
 
-Clone-and-install:
+One-line install (recommended):
+```bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | bash
+```
+
+Pin a specific version:
+```bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.2.0-beta.1 bash
+```
+
+Alternative (clone + local installer):
 ```bash
 git clone https://github.com/himudigonda/Please.git
 cd Please
 ./install.sh
 please --version
-```
-
-Curl install:
-```bash
-curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | bash
-```
-
-Install specific version:
-```bash
-PLEASE_VERSION=v0.2.0 ./install.sh
 ```
 
 ## CLI quickstart
@@ -42,6 +42,24 @@ please --workspace . run ci
 please --workspace . run ci --explain
 please --workspace . graph ci --format text
 ```
+
+## Use Please in a new project
+1. Create a `pleasefile` at your project root:
+```toml
+[please]
+version = "0.2"
+
+[task.build]
+inputs = ["src/**/*", "Cargo.toml"]
+outputs = ["target/release/app"]
+isolation = "off"
+run = "cargo build --release"
+```
+2. Run your task:
+```bash
+please --workspace . run build --explain
+```
+3. Run it again and verify `cache hits:` appears.
 
 ## Cache explain mode
 Use `--explain` when you expect a cache hit but see execution:
@@ -102,6 +120,15 @@ cargo build --release -p please-cli
 alias please="$(pwd)/target/release/please"
 please --workspace . run ci
 ```
+
+## Troubleshooting
+- `bwrap ... Operation not permitted` on CI/containers:
+  Set task `isolation = "off"` (or `best_effort`) for non-sandbox-critical tasks.
+- Task always re-runs:
+  Use `--explain` and check changed `inputs`, `env`, or `run` content.
+- Install script pulled wrong version:
+  Pin explicitly with:
+  `curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.2.0-beta.1 bash`
 
 ## Core docs
 - [CONTRIBUTING.md](CONTRIBUTING.md)
