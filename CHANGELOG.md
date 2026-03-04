@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.2.0-beta.1] - 2026-03-04
+## [0.2.0] - 2026-03-04
 
 ### Added
 - Cache telemetry with `please run <task> --explain`.
@@ -19,8 +19,8 @@ All notable changes to this project are documented in this file.
 ### Changed
 - Generic e2e fixtures now set `isolation = "best_effort"` explicitly.
 - Linux CI now installs and verifies `bwrap`.
-- Workspace version bumped to `0.2.0-beta.1`.
-- Release and migration docs updated for beta and manual-first migration guidance.
+- Workspace version bumped to `0.2.0`.
+- Release and migration docs updated for v0.2.0 and manual-first migration guidance.
 
 ### Fixed
 - Installer/runtime edge cases validated through end-to-end release flow.
@@ -34,4 +34,3 @@ All notable changes to this project are documented in this file.
   - DAG-aware execution, local CAS + SQLite cache.
   - Transactional output promotion.
   - Linux strict isolation support and macOS best-effort mode.
-

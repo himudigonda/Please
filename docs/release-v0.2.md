@@ -1,8 +1,8 @@
-# Please v0.2.0-beta.1 Release Notes (Draft)
+# Please v0.2.0 Release Notes
 
 ## Release type
-- Tag: `v0.2.0-beta.1`
-- Channel: prerelease
+- Tag: `v0.2.0`
+- Channel: stable (pre-1.0)
 - Repository: `himudigonda/Please`
 
 ## Highlights
@@ -20,7 +20,7 @@
   - `cache bypass: --force supplied`
 
 ## Validation evidence
-- `just ci` green locally.
+- `cargo run -p please-cli -- --workspace . run ci` green locally.
 - `please --workspace . run ci` green locally.
 - Showcase tasks validated:
   - `build_ui`

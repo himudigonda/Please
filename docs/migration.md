@@ -3,7 +3,7 @@
 `Please` replaces workflow orchestration semantics, not Make/Just file syntax.
 
 ## Important
-There is intentionally **no automatic importer** in v0.2.0-beta.1.
+There is intentionally **no automatic importer** in v0.2.0.
 Manual migration keeps `inputs`/`outputs` explicit and preserves deterministic caching and ACID semantics.
 
 ## Concept mapping
