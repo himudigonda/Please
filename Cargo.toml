@@ -8,11 +8,11 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 edition = "2021"
 license = "MIT"
 authors = ["Himudigonda"]
-repository = "https://example.com/please"
+repository = "https://github.com/himudigonda/Please"
 
 [workspace.dependencies]
 anyhow = "1.0"
@@ -35,3 +35,9 @@ toml = "0.8"
 walkdir = "2.5"
 which = "7.0"
 winnow = "0.7"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

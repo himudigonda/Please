@@ -101,6 +101,7 @@ fn looks_like_glob(pattern: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
 
     #[test]
     fn normalizes_valid_relative_paths() {
@@ -111,5 +112,31 @@ mod tests {
     #[test]
     fn rejects_parent_segments() {
         assert!(normalize_relative_path("../secret").is_err());
+    }
+
+    #[test]
+    fn resolves_recursive_glob_inputs() {
+        let tmp = tempfile::tempdir().expect("create tempdir");
+        let workspace = tmp.path();
+
+        fs::create_dir_all(workspace.join("src/nested")).expect("create nested dirs");
+        fs::write(
+            workspace.join("src/a.rs"),
+            "fn a() {}
+",
+        )
+        .expect("write src/a.rs");
+        fs::write(
+            workspace.join("src/nested/b.rs"),
+            "fn b() {}
+",
+        )
+        .expect("write src/nested/b.rs");
+        fs::write(workspace.join("src/nested/c.txt"), "ignore").expect("write src/nested/c.txt");
+
+        let patterns = vec!["src/**/*.rs".to_string()];
+        let resolved = resolve_inputs(workspace, &patterns).expect("resolve glob inputs");
+
+        assert_eq!(resolved, vec![PathBuf::from("src/a.rs"), PathBuf::from("src/nested/b.rs")]);
     }
 }

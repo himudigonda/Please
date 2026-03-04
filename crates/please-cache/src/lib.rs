@@ -383,4 +383,33 @@ mod tests {
         let restored = fs::read_to_string(&output_abs).expect("read restored output");
         assert_eq!(restored, "hello");
     }
+
+    #[test]
+    fn fetch_execution_returns_none_for_unknown_task() {
+        let tmp = tempfile::tempdir().expect("create temp dir");
+        let store = LocalArtifactStore::new(tmp.path().join("cache")).expect("create store");
+
+        let record =
+            store.fetch_execution("missing_task", "fingerprint").expect("fetch missing task");
+        assert!(record.is_none());
+    }
+
+    #[test]
+    fn fetch_execution_returns_none_for_fingerprint_mismatch() {
+        let tmp = tempfile::tempdir().expect("create temp dir");
+        let store = LocalArtifactStore::new(tmp.path().join("cache")).expect("create store");
+
+        let existing = ExecutionRecord {
+            task_name: "build".to_string(),
+            fingerprint: "fp-1".to_string(),
+            artifacts: vec![],
+            stdout: "".to_string(),
+            stderr: "".to_string(),
+            created_at: 1,
+        };
+        store.save_execution(&existing).expect("save execution");
+
+        let record = store.fetch_execution("build", "fp-2").expect("fetch mismatched fingerprint");
+        assert!(record.is_none());
+    }
 }
