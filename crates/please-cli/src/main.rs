@@ -1,11 +1,13 @@
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use anyhow::{anyhow, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
-use please_cache::{ArtifactStore, LocalArtifactStore};
+use please_cache::LocalArtifactStore;
 use please_core::{
     load_pleasefile, validate_pleasefile, Executor, IsolationMode, RunOptions, TaskGraph,
 };
+use please_store::ArtifactStore;
 
 #[derive(Debug, Parser)]
 #[command(name = "please")]
@@ -101,7 +103,7 @@ fn run() -> Result<()> {
         Command::Run { task, dry_run, force, no_cache, jobs } => {
             let config = load_and_validate(&workspace)?;
             let cache = LocalArtifactStore::new(cache_root(&workspace))?;
-            let executor = Executor::new(&workspace, config, cache)?;
+            let executor = Executor::new(&workspace, config, Arc::new(cache))?;
 
             let mut options = RunOptions { dry_run, force, no_cache, ..RunOptions::default() };
             if let Some(j) = jobs {
