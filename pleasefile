@@ -29,3 +29,17 @@ deps = ["cov"]
 inputs = ["pleasefile"]
 outputs = [".please/stamps/ci.ok"]
 run = "mkdir -p .please/stamps && printf 'ok\n' > .please/stamps/ci.ok"
+
+[task.examples_smoke]
+inputs = ["pleasefile", "examples/**/pleasefile", "examples/**/src/**/*", "examples/**/Cargo.toml", "examples/**/go.mod", "examples/**/package.json"]
+outputs = [".please/stamps/examples_smoke.ok"]
+isolation = "off"
+run = """
+mkdir -p .please/stamps
+cargo run -p please-cli -- --workspace examples/minimal run hello
+cargo run -p please-cli -- --workspace examples/polyglot run package
+cargo run -p please-cli -- --workspace examples/python-cli run ci
+cargo run -p please-cli -- --workspace examples/go-http run ci
+cargo run -p please-cli -- --workspace examples/node-web run ci
+printf 'ok\n' > .please/stamps/examples_smoke.ok
+"""
