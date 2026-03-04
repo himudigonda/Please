@@ -1,0 +1,16 @@
+[package]
+name = "please-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "please"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+which.workspace = true
+please-cache = { path = "../please-cache" }
+please-core = { path = "../please-core" }

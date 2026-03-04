@@ -1,0 +1,30 @@
+[package]
+name = "please-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+blake3.workspace = true
+glob.workspace = true
+num_cpus.workspace = true
+petgraph.workspace = true
+rayon.workspace = true
+serde.workspace = true
+shell-words.workspace = true
+tempfile.workspace = true
+thiserror.workspace = true
+toml.workspace = true
+walkdir.workspace = true
+which.workspace = true
+please-cache = { path = "../please-cache" }
+
+[dev-dependencies]
+criterion = "0.5"
+serde_json.workspace = true
+tempfile.workspace = true
+
+[[bench]]
+name = "core_bench"
+harness = false

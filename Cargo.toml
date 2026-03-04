@@ -1,0 +1,32 @@
+[workspace]
+members = [
+  "crates/please-cli",
+  "crates/please-core",
+  "crates/please-cache",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Himudigonda"]
+repository = "https://example.com/please"
+
+[workspace.dependencies]
+anyhow = "1.0"
+blake3 = "1.8"
+clap = { version = "4.5", features = ["derive"] }
+glob = "0.3"
+num_cpus = "1.17"
+petgraph = "0.6"
+rayon = "1.10"
+rusqlite = { version = "0.33", features = ["bundled"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+shell-words = "1.1"
+tempfile = "3.14"
+thiserror = "2.0"
+toml = "0.8"
+walkdir = "2.5"
+which = "7.0"

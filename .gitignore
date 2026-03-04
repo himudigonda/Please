@@ -1,0 +1,7 @@
+/target
+/.please
+**/*.profraw
+**/*.profdata
+test_project/
+examples/basic/
+dumper.sh
