@@ -95,3 +95,36 @@ fn test_acid_rollback_on_failure() {
         fs::read_to_string(workspace.join("dist/bad.txt")).expect("read rollback state");
     assert_eq!(out_content.trim(), "stable", "ACID rollback failed: workspace was polluted");
 }
+
+#[test]
+fn test_doctor_no_repair_reports_workspace() {
+    let temp = tempfile::tempdir().expect("create tempdir");
+    let workspace = temp.path();
+    setup_workspace(workspace);
+
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("please"));
+    cmd.arg("--workspace")
+        .arg(workspace)
+        .arg("doctor")
+        .arg("--no-repair")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("workspace:"))
+        .stdout(predicate::str::contains(workspace.to_string_lossy().to_string()));
+}
+
+#[test]
+fn test_run_missing_task_fails_with_message() {
+    let temp = tempfile::tempdir().expect("create tempdir");
+    let workspace = temp.path();
+    setup_workspace(workspace);
+
+    let mut cmd = Command::new(assert_cmd::cargo::cargo_bin!("please"));
+    cmd.arg("--workspace")
+        .arg(workspace)
+        .arg("run")
+        .arg("missing_task")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("task 'missing_task' not found"));
+}
