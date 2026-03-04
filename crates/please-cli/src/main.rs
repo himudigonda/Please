@@ -186,13 +186,17 @@ fn run_doctor(workspace: &Path, repair: bool) -> Result<()> {
         }
     }
 
+    let mut strict_probe_warning: Option<String> = None;
     if cfg!(target_os = "linux") && !strict_tasks.is_empty() {
-        probe_linux_bwrap().context("strict isolation doctor probe failed")?;
+        if let Err(error) = probe_linux_bwrap() {
+            strict_probe_warning = Some(format!("strict isolation doctor probe failed: {}", error));
+        }
     }
     if cfg!(target_os = "macos") && !strict_tasks.is_empty() {
-        return Err(anyhow!(
+        strict_probe_warning = Some(
             "strict isolation tasks are configured but strict sandboxing is unsupported on macOS"
-        ));
+                .to_string(),
+        );
     }
 
     println!("doctor: ok");
@@ -213,6 +217,12 @@ fn run_doctor(workspace: &Path, repair: bool) -> Result<()> {
         println!("isolation: no strict tasks declared");
     } else {
         println!("strict isolation tasks: {}", strict_tasks.join(", "));
+        if let Some(warning) = strict_probe_warning {
+            println!("strict isolation probe: warning");
+            println!("- {}", warning);
+        } else if cfg!(target_os = "linux") {
+            println!("strict isolation probe: ok");
+        }
     }
 
     Ok(())
