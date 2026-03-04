@@ -14,6 +14,7 @@ use please_store::ArtifactStore;
 #[derive(Debug, Parser)]
 #[command(name = "please")]
 #[command(about = "Deterministic task runner powered by pleasefile")]
+#[command(version)]
 struct Cli {
     #[arg(long, default_value = ".")]
     workspace: PathBuf,
