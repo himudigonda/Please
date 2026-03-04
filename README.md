@@ -85,6 +85,7 @@ please --workspace . run ci
 
 ## Core docs
 - [CONTRIBUTING.md](CONTRIBUTING.md)
+- [CHANGELOG.md](CHANGELOG.md)
 - [docs/architecture.md](docs/architecture.md)
 - [docs/cache-telemetry.md](docs/cache-telemetry.md)
 - [docs/release-v0.2.md](docs/release-v0.2.md)
