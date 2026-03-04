@@ -584,8 +584,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "blake3",
+ "please-store",
  "rusqlite",
- "serde",
  "serde_json",
  "tempfile",
  "walkdir",
@@ -599,6 +599,7 @@ dependencies = [
  "clap",
  "please-cache",
  "please-core",
+ "please-store",
  "which",
 ]
 
@@ -613,6 +614,7 @@ dependencies = [
  "num_cpus",
  "petgraph",
  "please-cache",
+ "please-store",
  "rayon",
  "serde",
  "serde_json",
@@ -622,6 +624,14 @@ dependencies = [
  "toml",
  "walkdir",
  "which",
+]
+
+[[package]]
+name = "please-store"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
 ]
 
 [[package]]
