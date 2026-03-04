@@ -1,11 +1,16 @@
 use std::env;
 use std::fs;
 use std::io;
+use std::io::IsTerminal;
 use std::path::{Component, Path, PathBuf};
 use std::process::{Command, Output};
+use std::sync::mpsc::{self, Sender};
 use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use please_cache::unix_timestamp_secs;
 use please_store::{ArtifactStore, ExecutionRecord};
 use rayon::prelude::*;
@@ -53,6 +58,20 @@ struct TaskOutcome {
     dry_run: bool,
 }
 
+#[derive(Debug, Clone, Copy)]
+enum TaskProgressStatus {
+    Executed,
+    CacheHit,
+    DryRun,
+    Failed,
+}
+
+#[derive(Debug, Clone)]
+enum ProgressEvent {
+    TaskStarted(String),
+    TaskFinished(String, TaskProgressStatus),
+}
+
 pub struct Executor {
     workspace_root: PathBuf,
     config: PleaseFile,
@@ -85,19 +104,43 @@ impl Executor {
     pub fn run_target(&self, target: &str, options: &RunOptions) -> Result<RunSummary> {
         let layers = self.graph.layers_for_target(target)?;
         let mut summary = RunSummary::default();
+        let progress_enabled = io::stderr().is_terminal();
+        let mut renderer: Option<thread::JoinHandle<()>> = None;
+        let mut progress_sender: Option<Sender<ProgressEvent>> = None;
+
+        if progress_enabled {
+            let (tx, rx) = mpsc::channel::<ProgressEvent>();
+            progress_sender = Some(tx);
+            renderer = Some(thread::spawn(move || run_progress_renderer(rx)));
+        }
 
         let pool = rayon::ThreadPoolBuilder::new()
             .num_threads(options.jobs.max(1))
             .build()
             .context("building worker pool")?;
 
-        for layer in layers {
+        for mut layer in layers {
+            layer.sort();
             let outcomes: Vec<Result<TaskOutcome>> = pool.install(|| {
-                layer.par_iter().map(|task_name| self.execute_task(task_name, options)).collect()
+                layer
+                    .par_iter()
+                    .map(|task_name| {
+                        self.execute_task(task_name, options, progress_sender.as_ref().cloned())
+                    })
+                    .collect()
             });
 
             for outcome in outcomes {
-                let outcome = outcome?;
+                let outcome = match outcome {
+                    Ok(value) => value,
+                    Err(error) => {
+                        drop(progress_sender.take());
+                        if let Some(handle) = renderer.take() {
+                            let _ = handle.join();
+                        }
+                        return Err(error);
+                    }
+                };
                 if outcome.dry_run {
                     summary.dry_run.push(outcome.task_name);
                 } else if outcome.from_cache {
@@ -108,10 +151,21 @@ impl Executor {
             }
         }
 
+        drop(progress_sender.take());
+        if let Some(handle) = renderer.take() {
+            let _ = handle.join();
+        }
+
         Ok(summary)
     }
 
-    fn execute_task(&self, task_name: &str, options: &RunOptions) -> Result<TaskOutcome> {
+    fn execute_task(
+        &self,
+        task_name: &str,
+        options: &RunOptions,
+        progress: Option<Sender<ProgressEvent>>,
+    ) -> Result<TaskOutcome> {
+        emit_progress(&progress, ProgressEvent::TaskStarted(task_name.to_string()));
         let task = self
             .config
             .task
@@ -125,6 +179,13 @@ impl Executor {
         if !options.force && !options.no_cache {
             if let Some(record) = self.store.fetch_execution(task_name, &fingerprint.0)? {
                 if options.dry_run {
+                    emit_progress(
+                        &progress,
+                        ProgressEvent::TaskFinished(
+                            task_name.to_string(),
+                            TaskProgressStatus::DryRun,
+                        ),
+                    );
                     return Ok(TaskOutcome {
                         task_name: task_name.to_string(),
                         from_cache: true,
@@ -136,6 +197,13 @@ impl Executor {
                     .restore_artifacts(&self.workspace_root, &record.artifacts)
                     .with_context(|| format!("restoring cache hit for task '{}'", task_name))?;
 
+                emit_progress(
+                    &progress,
+                    ProgressEvent::TaskFinished(
+                        task_name.to_string(),
+                        TaskProgressStatus::CacheHit,
+                    ),
+                );
                 return Ok(TaskOutcome {
                     task_name: task_name.to_string(),
                     from_cache: true,
@@ -145,6 +213,10 @@ impl Executor {
         }
 
         if options.dry_run {
+            emit_progress(
+                &progress,
+                ProgressEvent::TaskFinished(task_name.to_string(), TaskProgressStatus::DryRun),
+            );
             return Ok(TaskOutcome {
                 task_name: task_name.to_string(),
                 from_cache: false,
@@ -158,6 +230,10 @@ impl Executor {
             .with_context(|| format!("executing task '{}'", task_name))?;
 
         if !output.status.success() {
+            emit_progress(
+                &progress,
+                ProgressEvent::TaskFinished(task_name.to_string(), TaskProgressStatus::Failed),
+            );
             let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
             let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
             return Err(anyhow!(
@@ -185,6 +261,10 @@ impl Executor {
             self.store.save_execution(&record)?;
         }
 
+        emit_progress(
+            &progress,
+            ProgressEvent::TaskFinished(task_name.to_string(), TaskProgressStatus::Executed),
+        );
         Ok(TaskOutcome { task_name: task_name.to_string(), from_cache: false, dry_run: false })
     }
 
@@ -355,6 +435,53 @@ impl Executor {
         }
 
         Ok(())
+    }
+}
+
+fn emit_progress(sender: &Option<Sender<ProgressEvent>>, event: ProgressEvent) {
+    if let Some(tx) = sender {
+        let _ = tx.send(event);
+    }
+}
+
+fn run_progress_renderer(receiver: mpsc::Receiver<ProgressEvent>) {
+    let multi = MultiProgress::new();
+    let style = ProgressStyle::with_template("{spinner:.green} {msg}")
+        .unwrap_or_else(|_| ProgressStyle::default_spinner())
+        .tick_strings(&["-", "\\", "|", "/"]);
+
+    let mut bars: std::collections::HashMap<String, ProgressBar> = std::collections::HashMap::new();
+
+    while let Ok(event) = receiver.recv() {
+        match event {
+            ProgressEvent::TaskStarted(task) => {
+                let bar = bars.entry(task.clone()).or_insert_with(|| {
+                    let pb = multi.add(ProgressBar::new_spinner());
+                    pb.set_style(style.clone());
+                    pb.enable_steady_tick(Duration::from_millis(100));
+                    pb
+                });
+                bar.set_message(format!("{task} running"));
+            }
+            ProgressEvent::TaskFinished(task, status) => {
+                if let Some(bar) = bars.remove(&task) {
+                    match status {
+                        TaskProgressStatus::Executed => {
+                            bar.finish_and_clear();
+                        }
+                        TaskProgressStatus::CacheHit => {
+                            bar.finish_and_clear();
+                        }
+                        TaskProgressStatus::DryRun => {
+                            bar.finish_and_clear();
+                        }
+                        TaskProgressStatus::Failed => {
+                            bar.finish_with_message(format!("{task} failed"));
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
