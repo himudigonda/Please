@@ -14,3 +14,4 @@ clap.workspace = true
 which.workspace = true
 please-cache = { path = "../please-cache" }
 please-core = { path = "../please-core" }
+please-store = { path = "../please-store" }

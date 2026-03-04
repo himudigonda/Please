@@ -3,6 +3,7 @@ members = [
   "crates/please-cli",
   "crates/please-core",
   "crates/please-cache",
+  "crates/please-store",
 ]
 resolver = "2"
 
