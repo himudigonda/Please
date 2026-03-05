@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/please_docs",
+      "destination": "/"
+    },
+    {
+      "source": "/please_docs/:path*",
+      "destination": "/:path*"
+    }
+  ]
+}
