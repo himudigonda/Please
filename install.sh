@@ -4,6 +4,7 @@ set -euo pipefail
 REPO="${PLEASE_REPO:-himudigonda/Please}"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 VERSION="${PLEASE_VERSION:-}"
+CHANNEL="${PLEASE_CHANNEL:-latest}"
 temp_dir=""
 
 fail() {
@@ -49,16 +50,19 @@ resolve_tag() {
   api_latest="https://api.github.com/repos/${REPO}/releases/latest"
   api_all="https://api.github.com/repos/${REPO}/releases?per_page=20"
 
-  response="$(curl -fsSL "$api_latest" 2>/dev/null || true)"
-  tag="$(printf '%s\n' "$response" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  if [ "$CHANNEL" = "stable" ]; then
+    response="$(curl -fsSL "$api_latest" 2>/dev/null || true)"
+    tag="$(printf '%s\n' "$response" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  fi
 
-  if [ -z "$tag" ]; then
+  if [ -z "${tag:-}" ]; then
     response="$(curl -fsSL "$api_all")"
     tag="$(
       python3 -c '
 import json, os, sys
 
-allow_prerelease = os.environ.get("PLEASE_ALLOW_PRERELEASE", "").lower() in {"1", "true", "yes"}
+channel = os.environ.get("PLEASE_CHANNEL", "latest").lower()
+prefer_stable = channel == "stable"
 
 try:
     releases = json.load(sys.stdin)
@@ -70,17 +74,11 @@ candidate = ""
 for rel in releases:
     if rel.get("draft"):
         continue
-    if not rel.get("prerelease", False):
-        candidate = rel.get("tag_name", "")
+    if prefer_stable and rel.get("prerelease", False):
+        continue
+    candidate = rel.get("tag_name", "")
+    if candidate:
         break
-
-if not candidate and allow_prerelease:
-    for rel in releases:
-        if rel.get("draft"):
-            continue
-        candidate = rel.get("tag_name", "")
-        if candidate:
-            break
 
 print(candidate)
 ' <<<"$response"
@@ -88,7 +86,7 @@ print(candidate)
   fi
 
   if [ -z "$tag" ]; then
-    fail "unable to resolve latest stable release tag from GitHub API; set PLEASE_VERSION explicitly (or set PLEASE_ALLOW_PRERELEASE=1)"
+    fail "unable to resolve release tag from GitHub API; set PLEASE_VERSION explicitly"
   fi
 
   echo "$tag"

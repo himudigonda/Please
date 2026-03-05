@@ -20,6 +20,8 @@ All notable changes to this project are documented in this file.
 - Root and example `pleasefile`s migrated to `version = "0.4"`.
 - DSL `version = "0.3"` now emits a deprecation warning in v0.4.
 - Fingerprints now include resolved variable values used by tasks.
+- Installer default channel now resolves latest published release (`PLEASE_CHANNEL=latest`).
+- Stable-only installs are available via `PLEASE_CHANNEL=stable`.
 
 ### Compatibility
 - TOML `pleasefile` support remains available with deprecation warning (planned removal target: v0.5).

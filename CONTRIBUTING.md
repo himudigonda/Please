@@ -45,6 +45,7 @@ cargo run -p please-cli -- --workspace . run ci
 See:
 - [docs/release-runbook.md](docs/release-runbook.md)
 - [docs/release-v0.4.md](docs/release-v0.4.md)
+- [docs/install.md](docs/install.md)
 
 ## Design principles
 - Determinism over convenience.

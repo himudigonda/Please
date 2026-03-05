@@ -3,8 +3,7 @@
 `Please` is a deterministic task runner for polyglot projects.
 
 ## Status
-- Stable channel: `v0.2.0`
-- Current prerelease: `v0.4.0-rc.1` (Intelligence + Ergonomics)
+- Latest release: `v0.4.0-rc.1` (Intelligence + Ergonomics)
 
 ## Why Please
 - Content-hash invalidation (BLAKE3), not mtime heuristics.
@@ -19,12 +18,17 @@ Supported binaries:
 - `x86_64-unknown-linux-gnu`
 - `aarch64-apple-darwin`
 
-Install latest stable (default):
+Install latest release (default):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | bash
 ```
 
-Install a pinned beta:
+Install stable channel explicitly:
+```bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_CHANNEL=stable bash
+```
+
+Install a pinned prerelease:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.4.0-rc.1 bash
 ```
@@ -114,5 +118,8 @@ cargo build --release -p please-cli
 - [docs/architecture.md](docs/architecture.md)
 - [docs/cache-telemetry.md](docs/cache-telemetry.md)
 - [docs/migration.md](docs/migration.md)
+- [docs/install.md](docs/install.md)
 - [docs/security.md](docs/security.md)
+- [docs/variables.md](docs/variables.md)
+- [docs/watch-mode.md](docs/watch-mode.md)
 - [docs/release-v0.4.md](docs/release-v0.4.md)

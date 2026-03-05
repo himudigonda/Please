@@ -32,9 +32,12 @@ This runbook covers cutting and publishing `v0.4.0-rc.1` for `himudigonda/Please
 1. Install check (explicit beta pin):
    - `curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.4.0-rc.1 bash`
    - `please --version`
-2. Functional check:
+2. Channel checks:
+   - default latest channel: `curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | bash`
+   - stable-only channel: `curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_CHANNEL=stable bash`
+3. Functional check:
    - `please --workspace . run ci --explain`
-3. Showcase smoke:
+4. Showcase smoke:
    - `cd examples/showcase`
    - `../../target/debug/please --workspace . run build_ui`
    - `../../target/debug/please --workspace . run build_api`

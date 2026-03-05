@@ -39,6 +39,9 @@
 
 ## Operational guidance
 - Avoid nondeterministic dynamic variables (for example: `$(date)`) in graph tasks unless cache busting is intentional.
+- Installer channels:
+  - default channel now resolves latest published release.
+  - use `PLEASE_CHANNEL=stable` to force stable-only resolution.
 - Use explicit release pin for RC install:
   - `PLEASE_VERSION=v0.4.0-rc.1`
 
