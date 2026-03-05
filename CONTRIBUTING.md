@@ -32,7 +32,7 @@ cargo run -p please-cli -- --workspace . run ci
 - Release tags should be cut from already-green `main` commits only.
 
 ## Isolation guidance for tests
-- Generic integration tests must set explicit `isolation = "best_effort"` unless strict isolation is the feature under test.
+- Generic integration tests must set explicit `@isolation best_effort` (or TOML `isolation = "best_effort"` for legacy fixtures) unless strict isolation is the feature under test.
 - Strict-isolation behavior should be tested in dedicated Linux-focused tests.
 
 ## Expected test coverage by change type
@@ -44,10 +44,11 @@ cargo run -p please-cli -- --workspace . run ci
 ## Release process
 See:
 - [docs/release-runbook.md](docs/release-runbook.md)
-- [docs/release-v0.2.md](docs/release-v0.2.md)
+- [docs/release-v0.3.md](docs/release-v0.3.md)
 
 ## Design principles
 - Determinism over convenience.
 - Explicit contracts over implicit state.
 - Atomic behavior over partial side effects.
 - Actionable diagnostics over black-box execution.
+- Keep the DSL ergonomic; prefer simple task bodies with annotations only where needed.

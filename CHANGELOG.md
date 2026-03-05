@@ -2,6 +2,36 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.0-beta.1] - 2026-03-05
+
+### Added
+- Hybrid task execution model:
+  - graph mode (cached/staged/deterministic).
+  - interactive mode (live workspace + TTY + uncached).
+- DSL-first `pleasefile` support (`version = "0.3"`) with:
+  - task headers (`task: deps...`),
+  - annotations (`@in`, `@out`, `@env`, `@secret_env`, `@dir`, `@mode`, `@isolation`),
+  - aliases (`alias short = target`),
+  - global env loading (`@load .env`).
+- CLI passthrough arguments:
+  - `please run <task> -- <args...>`.
+- Mode-aware explain diagnostics:
+  - interactive bypass reason surfaced in `--explain`.
+- Alias-aware execution:
+  - aliases resolve in `run`, `graph`, and `list`.
+
+### Changed
+- Parser autodetect now defaults to DSL and falls back to TOML when TOML sections are detected.
+- TOML parser path now emits a deprecation warning (removal target: v0.5).
+- Root and example `pleasefile`s migrated to DSL v0.3.
+- CLI integration fixtures migrated to DSL and expanded for:
+  - interactive explain behavior,
+  - passthrough fingerprint delta behavior,
+  - alias invocation in `run` and `graph`.
+
+### Compatibility
+- TOML `pleasefile` support is retained in v0.3 for safe migration.
+
 ## [0.2.0] - 2026-03-04
 
 ### Added
