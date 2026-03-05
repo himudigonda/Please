@@ -79,7 +79,11 @@ enum GraphFormat {
 
 fn main() {
     if let Err(error) = run() {
-        eprintln!("error: {error:?}");
+        if let Some(report) = error.downcast_ref::<miette::Report>() {
+            eprintln!("{report:?}");
+        } else {
+            eprintln!("error: {error:#}");
+        }
         std::process::exit(1);
     }
 }
@@ -104,12 +108,18 @@ fn run() -> Result<()> {
             let config = load_and_validate(&workspace)?;
             let graph = TaskGraph::build(&config.task)?;
             for task in graph.all_tasks_sorted() {
+                if config.task.get(&task).is_some_and(|spec| spec.private) {
+                    continue;
+                }
                 match config.task.get(&task).and_then(|spec| spec.description.as_deref()) {
                     Some(description) => println!("{task}\t- {description}"),
                     None => println!("{task}"),
                 }
             }
             for (alias, target) in &config.alias {
+                if config.task.get(target).is_some_and(|spec| spec.private) {
+                    continue;
+                }
                 println!("alias {alias} -> {target}");
             }
             Ok(())
@@ -460,6 +470,28 @@ mod tests {
         match cli.command {
             Some(Command::Run { args, .. }) => {
                 assert_eq!(args, vec!["--watch", "--grep", "slow suite"]);
+            }
+            _ => panic!("expected run command"),
+        }
+    }
+
+    #[test]
+    fn parses_passthrough_args_without_separator() {
+        let cli = Cli::try_parse_from([
+            "please",
+            "--workspace",
+            ".",
+            "run",
+            "test",
+            "-v",
+            "--grep",
+            "slow",
+        ])
+        .expect("parse cli");
+
+        match cli.command {
+            Some(Command::Run { args, .. }) => {
+                assert_eq!(args, vec!["-v", "--grep", "slow"]);
             }
             _ => panic!("expected run command"),
         }

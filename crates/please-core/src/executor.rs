@@ -18,7 +18,7 @@ use notify::{Config as NotifyConfig, Event, RecommendedWatcher, RecursiveMode, W
 use please_cache::unix_timestamp_secs;
 use please_store::{ArtifactStore, ExecutionRecord};
 use rayon::prelude::*;
-use tempfile::TempDir;
+use tempfile::{NamedTempFile, TempDir};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::fingerprint::compute_fingerprint;
@@ -361,12 +361,17 @@ impl Executor {
             .task
             .get(task_name)
             .ok_or_else(|| anyhow!("task '{}' not found", task_name))?;
+        let (task, passthrough_args) =
+            self.resolve_task_with_params(task_name, task, &options.passthrough_args)?;
         let task_mode = task.inferred_mode();
+        if !options.dry_run {
+            self.require_task_confirmation(task_name, &task)?;
+        }
         let show_progress = task_mode != TaskMode::Interactive;
         if show_progress {
             emit_progress(&progress, ProgressEvent::TaskStarted(task_name.to_string()));
         }
-        let (resolved_env, secret_env_keys) = self.resolve_task_env(task)?;
+        let (resolved_env, secret_env_keys) = self.resolve_task_env(&task)?;
         let redactor = SecretRedactor::from_env(&resolved_env, &secret_env_keys);
 
         if task_mode == TaskMode::Interactive {
@@ -401,10 +406,10 @@ impl Executor {
 
             self.run_interactive_command(
                 task_name,
-                task,
+                &task,
                 &resolved_env,
                 redactor.as_ref(),
-                options,
+                &passthrough_args,
             )
             .with_context(|| format!("executing interactive task '{}'", task_name))?;
             if show_progress {
@@ -428,16 +433,16 @@ impl Executor {
             });
         }
 
-        let outputs = normalize_outputs(task)?;
+        let outputs = normalize_outputs(&task)?;
         let inputs = resolve_inputs(&self.workspace_root, &task.inputs)?;
         let fingerprint_result = compute_fingerprint(
             &self.workspace_root,
             task_name,
-            task,
+            &task,
             &inputs,
             &resolved_env,
             &secret_env_keys,
-            &options.passthrough_args,
+            &passthrough_args,
         )?;
         let mut cache_miss_reasons = Vec::new();
 
@@ -507,7 +512,14 @@ impl Executor {
 
         let stage = self.create_stage_snapshot(task_name)?;
         let output = self
-            .run_task_command(task_name, task, stage.path(), &resolved_env, options)
+            .run_task_command(
+                task_name,
+                &task,
+                stage.path(),
+                &resolved_env,
+                &passthrough_args,
+                options,
+            )
             .with_context(|| format!("executing task '{}'", task_name))?;
         let output = redact_output(output, redactor.as_ref());
 
@@ -605,10 +617,11 @@ impl Executor {
         task: &TaskSpec,
         stage_workspace: &Path,
         resolved_env: &BTreeMap<String, String>,
+        passthrough_args: &[String],
         options: &RunOptions,
     ) -> Result<Output> {
         let isolation_mode = selected_isolation(task, options);
-        let shell_command = build_shell_command(task, &options.passthrough_args);
+        let invocation = prepare_task_invocation(stage_workspace, task, passthrough_args)?;
 
         let mut command = match isolation_mode {
             IsolationMode::Strict if cfg!(target_os = "linux") => {
@@ -632,10 +645,9 @@ impl Executor {
                     .arg("--tmpfs")
                     .arg("/tmp")
                     .arg("--chdir")
-                    .arg(stage_workspace)
-                    .arg("/bin/sh")
-                    .arg("-lc")
-                    .arg(&shell_command);
+                    .arg(stage_workspace);
+                cmd.arg(&invocation.program);
+                cmd.args(&invocation.args);
                 cmd
             }
             IsolationMode::Strict => {
@@ -644,8 +656,8 @@ impl Executor {
                 ));
             }
             IsolationMode::BestEffort | IsolationMode::Off => {
-                let mut cmd = Command::new("/bin/sh");
-                cmd.arg("-lc").arg(&shell_command);
+                let mut cmd = Command::new(&invocation.program);
+                cmd.args(&invocation.args);
                 cmd
             }
         };
@@ -668,7 +680,9 @@ impl Executor {
             command.env(key, value);
         }
 
-        command.output().with_context(|| format!("spawning task command '{}'", shell_command))
+        command
+            .output()
+            .with_context(|| format!("spawning task command '{}'", invocation.display_command))
     }
 
     fn run_interactive_command(
@@ -677,13 +691,13 @@ impl Executor {
         task: &TaskSpec,
         resolved_env: &BTreeMap<String, String>,
         redactor: Option<&SecretRedactor>,
-        options: &RunOptions,
+        passthrough_args: &[String],
     ) -> Result<()> {
-        let shell_command = build_shell_command(task, &options.passthrough_args);
-        println!("[{task_name}] $ {shell_command}");
+        let invocation = prepare_task_invocation(&self.workspace_root, task, passthrough_args)?;
+        println!("[{task_name}] $ {}", invocation.display_command);
 
-        let mut command = Command::new("/bin/sh");
-        command.arg("-lc").arg(&shell_command);
+        let mut command = Command::new(&invocation.program);
+        command.args(&invocation.args);
         command
             .current_dir(resolve_execution_dir(&self.workspace_root, task.working_dir.as_deref())?);
         command.stdin(Stdio::inherit());
@@ -699,7 +713,7 @@ impl Executor {
 
         let status = if let Some(redactor) = redactor {
             let output = command.output().with_context(|| {
-                format!("spawning interactive task command '{}'", shell_command)
+                format!("spawning interactive task command '{}'", invocation.display_command)
             })?;
             let output = redact_output(output, Some(redactor));
             io::stdout()
@@ -710,15 +724,106 @@ impl Executor {
                 .context("writing redacted interactive stderr")?;
             output.status
         } else {
-            command
-                .status()
-                .with_context(|| format!("spawning interactive task command '{}'", shell_command))?
+            command.status().with_context(|| {
+                format!("spawning interactive task command '{}'", invocation.display_command)
+            })?
         };
         if status.success() {
             Ok(())
         } else {
             Err(anyhow!("interactive task '{}' failed with status {}", task_name, status))
         }
+    }
+
+    fn resolve_task_with_params(
+        &self,
+        task_name: &str,
+        task: &TaskSpec,
+        cli_args: &[String],
+    ) -> Result<(TaskSpec, Vec<String>)> {
+        let mut resolved = task.clone();
+        if task.params.is_empty() {
+            return Ok((resolved, cli_args.to_vec()));
+        }
+
+        let mut bindings = BTreeMap::new();
+        let mut cursor = 0usize;
+        for param in &task.params {
+            let value =
+                cli_args.get(cursor).cloned().or_else(|| param.default.clone()).ok_or_else(
+                    || {
+                        anyhow!(
+                            "task '{}' requires parameter '{}' (usage: {} {})",
+                            task_name,
+                            param.name,
+                            task_name,
+                            task.params
+                                .iter()
+                                .map(|item| {
+                                    if item.default.is_some() {
+                                        format!("[{}]", item.name)
+                                    } else {
+                                        format!("<{}>", item.name)
+                                    }
+                                })
+                                .collect::<Vec<String>>()
+                                .join(" ")
+                        )
+                    },
+                )?;
+            bindings.insert(param.name.clone(), value);
+            cursor += 1;
+        }
+
+        let passthrough_tail = cli_args[cursor..].to_vec();
+
+        for (key, value) in &bindings {
+            resolved.resolved_variables.insert(key.clone(), value.clone());
+        }
+
+        resolved.inputs =
+            resolved.inputs.iter().map(|value| apply_param_bindings(value, &bindings)).collect();
+        resolved.outputs =
+            resolved.outputs.iter().map(|value| apply_param_bindings(value, &bindings)).collect();
+        resolved.env = resolved
+            .env
+            .iter()
+            .map(|(key, value)| (key.clone(), apply_param_bindings(value, &bindings)))
+            .collect();
+        resolved.working_dir =
+            resolved.working_dir.as_ref().map(|value| apply_param_bindings(value, &bindings));
+        resolved.run = match &resolved.run {
+            crate::model::RunSpec::Shell(command) => {
+                crate::model::RunSpec::Shell(apply_param_bindings(command, &bindings))
+            }
+            crate::model::RunSpec::Args(args) => crate::model::RunSpec::Args(
+                args.iter().map(|value| apply_param_bindings(value, &bindings)).collect(),
+            ),
+        };
+
+        Ok((resolved, passthrough_tail))
+    }
+
+    fn require_task_confirmation(&self, task_name: &str, task: &TaskSpec) -> Result<()> {
+        let Some(prompt) = task.confirm.as_deref() else {
+            return Ok(());
+        };
+        if !io::stdin().is_terminal() {
+            return Err(anyhow!(
+                "task '{}' requires confirmation but stdin is not interactive",
+                task_name
+            ));
+        }
+
+        eprint!("{prompt} ");
+        io::stderr().flush().context("flushing confirmation prompt")?;
+        let mut answer = String::new();
+        io::stdin().read_line(&mut answer).context("reading confirmation response")?;
+        let answer = answer.trim().to_ascii_lowercase();
+        if answer == "y" || answer == "yes" {
+            return Ok(());
+        }
+        Err(anyhow!("task '{}' aborted by user", task_name))
     }
 
     fn resolve_task_env(
@@ -967,8 +1072,108 @@ fn redact_output(mut output: Output, redactor: Option<&SecretRedactor>) -> Outpu
     output
 }
 
-fn build_shell_command(task: &TaskSpec, passthrough_args: &[String]) -> String {
-    let mut command = task.run_as_shell();
+struct TaskInvocation {
+    display_command: String,
+    program: PathBuf,
+    args: Vec<String>,
+    _temp_script: Option<NamedTempFile>,
+}
+
+fn prepare_task_invocation(
+    execution_root: &Path,
+    task: &TaskSpec,
+    passthrough_args: &[String],
+) -> Result<TaskInvocation> {
+    let run_command = task.run_as_shell();
+    if looks_like_shebang(&run_command) {
+        let script = create_temp_shebang_script(execution_root, &run_command)?;
+        let display_command = if passthrough_args.is_empty() {
+            script.path().display().to_string()
+        } else {
+            format!(
+                "{} {}",
+                script.path().display(),
+                passthrough_args
+                    .iter()
+                    .map(|part| shell_escape(part))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            )
+        };
+        return Ok(TaskInvocation {
+            display_command,
+            program: script.path().to_path_buf(),
+            args: passthrough_args.to_vec(),
+            _temp_script: Some(script),
+        });
+    }
+
+    let shell_command = build_shell_command(&run_command, passthrough_args);
+    let (program, mut args) = resolve_shell_command(task.shell_override.as_ref())?;
+    args.push(shell_command.clone());
+    Ok(TaskInvocation { display_command: shell_command, program, args, _temp_script: None })
+}
+
+fn create_temp_shebang_script(execution_root: &Path, script_body: &str) -> Result<NamedTempFile> {
+    let script_dir = execution_root.join(".please/tmp");
+    fs::create_dir_all(&script_dir)
+        .with_context(|| format!("creating shebang temp directory '{}'", script_dir.display()))?;
+    let mut script = tempfile::Builder::new()
+        .prefix("please-script-")
+        .tempfile_in(&script_dir)
+        .with_context(|| format!("creating shebang temp script in '{}'", script_dir.display()))?;
+    script
+        .as_file_mut()
+        .write_all(script_body.as_bytes())
+        .context("writing shebang script body")?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms =
+            script.as_file().metadata().context("reading shebang script metadata")?.permissions();
+        perms.set_mode(0o700);
+        script
+            .as_file()
+            .set_permissions(perms)
+            .context("setting shebang script executable permissions")?;
+    }
+    Ok(script)
+}
+
+fn resolve_shell_command(
+    shell_override: Option<&crate::model::ShellSpec>,
+) -> Result<(PathBuf, Vec<String>)> {
+    if let Some(shell_spec) = shell_override {
+        if shell_spec.program.trim().is_empty() {
+            return Err(anyhow!("shell override program cannot be empty"));
+        }
+        return Ok((PathBuf::from(shell_spec.program.clone()), shell_spec.args.clone()));
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(pwsh) = which::which("pwsh") {
+            return Ok((pwsh, vec!["-NoProfile".to_string(), "-Command".to_string()]));
+        }
+        if let Ok(cmd) = which::which("cmd") {
+            return Ok((cmd, vec!["/C".to_string()]));
+        }
+        return Ok((PathBuf::from("cmd.exe"), vec!["/C".to_string()]));
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok((PathBuf::from("/bin/sh"), vec!["-lc".to_string()]))
+    }
+}
+
+fn looks_like_shebang(script: &str) -> bool {
+    let first_non_empty = script.lines().find(|line| !line.trim().is_empty());
+    first_non_empty.is_some_and(|line| line.trim_start().starts_with("#!"))
+}
+
+fn build_shell_command(run_command: &str, passthrough_args: &[String]) -> String {
+    let mut command = run_command.to_string();
     if !passthrough_args.is_empty() {
         let joined = passthrough_args
             .iter()
@@ -979,6 +1184,30 @@ fn build_shell_command(task: &TaskSpec, passthrough_args: &[String]) -> String {
         command.push_str(&joined);
     }
     command
+}
+
+fn apply_param_bindings(input: &str, bindings: &BTreeMap<String, String>) -> String {
+    let mut output = String::with_capacity(input.len());
+    let mut cursor = 0usize;
+    while let Some(rel_start) = input[cursor..].find("{{") {
+        let start = cursor + rel_start;
+        output.push_str(&input[cursor..start]);
+        let open_end = start + 2;
+        let Some(rel_close) = input[open_end..].find("}}") else {
+            output.push_str(&input[start..]);
+            return output;
+        };
+        let close = open_end + rel_close;
+        let key = input[open_end..close].trim();
+        if let Some(value) = bindings.get(key) {
+            output.push_str(value);
+        } else {
+            output.push_str(&input[start..close + 2]);
+        }
+        cursor = close + 2;
+    }
+    output.push_str(&input[cursor..]);
+    output
 }
 
 fn shell_escape(input: &str) -> String {
@@ -1272,6 +1501,10 @@ mod tests {
             isolation: Some(IsolationMode::BestEffort),
             mode: Some(TaskMode::Graph),
             working_dir: None,
+            params: Vec::new(),
+            private: false,
+            confirm: None,
+            shell_override: None,
             requires: Vec::new(),
         }
     }
@@ -1422,6 +1655,66 @@ mod tests {
         assert!(stderr.contains("[REDACTED]"));
     }
 
+    #[test]
+    fn shebang_invocation_uses_temp_script_and_cleans_up() {
+        let tmp = tempfile::tempdir().expect("temp dir");
+        let task = TaskSpec {
+            deps: vec![],
+            description: None,
+            resolved_variables: BTreeMap::new(),
+            inputs: vec![],
+            outputs: vec![],
+            env: BTreeMap::new(),
+            env_inherit: Vec::new(),
+            secret_env: Vec::new(),
+            run: RunSpec::Shell("#!/usr/bin/env sh\necho hello".to_string()),
+            isolation: Some(IsolationMode::Off),
+            mode: Some(TaskMode::Interactive),
+            working_dir: None,
+            params: Vec::new(),
+            private: false,
+            confirm: None,
+            shell_override: None,
+            requires: Vec::new(),
+        };
+
+        let invocation = prepare_task_invocation(tmp.path(), &task, &[]).expect("invocation");
+        let script_path = invocation.program.clone();
+        assert!(script_path.exists(), "expected temporary shebang script to exist");
+        drop(invocation);
+        assert!(
+            !script_path.exists(),
+            "temporary shebang script should be removed when invocation is dropped"
+        );
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    #[test]
+    fn default_shell_is_posix_sh() {
+        let (program, args) = resolve_shell_command(None).expect("resolve shell");
+        assert_eq!(program, PathBuf::from("/bin/sh"));
+        assert_eq!(args, vec!["-lc".to_string()]);
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn default_shell_prefers_pwsh_then_cmd() {
+        let (program, args) = resolve_shell_command(None).expect("resolve shell");
+        let name = program.file_name().and_then(|part| part.to_str()).unwrap_or_default();
+        assert!(
+            name.eq_ignore_ascii_case("pwsh.exe")
+                || name.eq_ignore_ascii_case("pwsh")
+                || name.eq_ignore_ascii_case("cmd.exe")
+                || name.eq_ignore_ascii_case("cmd"),
+            "unexpected shell program: {}",
+            program.display()
+        );
+        assert!(
+            args == vec!["-NoProfile".to_string(), "-Command".to_string()]
+                || args == vec!["/C".to_string()]
+        );
+    }
+
     #[cfg(target_os = "linux")]
     fn strict_bwrap_supported() -> bool {
         let Ok(bwrap) = which::which("bwrap") else {
@@ -1486,6 +1779,10 @@ mod tests {
                 isolation: Some(IsolationMode::Strict),
                 mode: Some(TaskMode::Graph),
                 working_dir: None,
+                params: Vec::new(),
+                private: false,
+                confirm: None,
+                shell_override: None,
                 requires: Vec::new(),
             },
         );
@@ -1532,6 +1829,10 @@ mod tests {
                 isolation: Some(IsolationMode::Off),
                 mode: Some(TaskMode::Graph),
                 working_dir: None,
+                params: Vec::new(),
+                private: false,
+                confirm: None,
+                shell_override: None,
                 requires: Vec::new(),
             },
         );
