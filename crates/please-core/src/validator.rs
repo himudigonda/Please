@@ -152,6 +152,7 @@ mod tests {
         TaskSpec {
             deps: Vec::new(),
             description: None,
+            resolved_variables: BTreeMap::new(),
             inputs: vec!["src/main.rs".to_string()],
             outputs: vec!["dist/out.txt".to_string()],
             env: BTreeMap::new(),

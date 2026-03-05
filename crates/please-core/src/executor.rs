@@ -996,6 +996,7 @@ mod tests {
         TaskSpec {
             deps: vec![],
             description: None,
+            resolved_variables: BTreeMap::new(),
             inputs: vec!["src/input.txt".to_string()],
             outputs: vec!["dist/output.txt".to_string()],
             env: BTreeMap::new(),
@@ -1157,6 +1158,7 @@ mod tests {
             TaskSpec {
                 deps: vec![],
                 description: None,
+                resolved_variables: BTreeMap::new(),
                 inputs: vec!["src/input.txt".to_string()],
                 outputs: vec!["dist/output.txt".to_string()],
                 env: BTreeMap::new(),
@@ -1201,6 +1203,7 @@ mod tests {
             TaskSpec {
                 deps: vec![],
                 description: None,
+                resolved_variables: BTreeMap::new(),
                 inputs: vec!["src/input.txt".to_string()],
                 outputs: vec!["dist/output.txt".to_string()],
                 env: BTreeMap::new(),

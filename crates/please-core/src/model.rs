@@ -52,6 +52,8 @@ pub struct TaskSpec {
     #[serde(default)]
     pub description: Option<String>,
     #[serde(default)]
+    pub resolved_variables: BTreeMap<String, String>,
+    #[serde(default)]
     pub inputs: Vec<String>,
     #[serde(default)]
     pub outputs: Vec<String>,
