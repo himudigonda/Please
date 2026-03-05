@@ -1158,7 +1158,7 @@ fn resolve_shell_command(
         if let Ok(cmd) = which::which("cmd") {
             return Ok((cmd, vec!["/C".to_string()]));
         }
-        return Ok((PathBuf::from("cmd.exe"), vec!["/C".to_string()]));
+        Ok((PathBuf::from("cmd.exe"), vec!["/C".to_string()]))
     }
 
     #[cfg(not(target_os = "windows"))]
@@ -1481,7 +1481,10 @@ mod tests {
     use std::fs::File;
     use std::io::Read;
     use std::io::Write;
+    #[cfg(unix)]
     use std::os::unix::process::ExitStatusExt;
+    #[cfg(windows)]
+    use std::os::windows::process::ExitStatusExt;
     #[cfg(target_os = "linux")]
     use std::process::Command as ProcessCommand;
     use std::sync::Arc;
@@ -1642,7 +1645,7 @@ mod tests {
         .expect("redactor");
 
         let output = Output {
-            status: std::process::ExitStatus::from_raw(0),
+            status: success_exit_status(),
             stdout: b"token=supersecret".to_vec(),
             stderr: b"err supersecret".to_vec(),
         };
@@ -1653,6 +1656,17 @@ mod tests {
         assert!(!stderr.contains("supersecret"));
         assert!(stdout.contains("[REDACTED]"));
         assert!(stderr.contains("[REDACTED]"));
+    }
+
+    fn success_exit_status() -> std::process::ExitStatus {
+        #[cfg(unix)]
+        {
+            std::process::ExitStatus::from_raw(0)
+        }
+        #[cfg(windows)]
+        {
+            std::process::ExitStatus::from_raw(0)
+        }
     }
 
     #[test]
