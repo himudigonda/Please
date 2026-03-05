@@ -38,6 +38,7 @@ fn benchmark_fingerprint(c: &mut Criterion) {
         let task = TaskSpec {
             deps: Vec::new(),
             description: None,
+            resolved_variables: BTreeMap::new(),
             inputs: vec!["src/main.rs".to_string()],
             outputs: vec!["dist/app".to_string()],
             env: BTreeMap::new(),
@@ -74,6 +75,7 @@ fn task(deps: &[&str]) -> TaskSpec {
     TaskSpec {
         deps: deps.iter().map(|d| d.to_string()).collect(),
         description: None,
+        resolved_variables: BTreeMap::new(),
         inputs: vec!["src/main.rs".to_string()],
         outputs: vec!["dist/out".to_string()],
         env: BTreeMap::new(),
