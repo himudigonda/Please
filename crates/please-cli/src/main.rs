@@ -79,7 +79,11 @@ enum GraphFormat {
 
 fn main() {
     if let Err(error) = run() {
-        eprintln!("error: {error:?}");
+        if let Some(report) = error.downcast_ref::<miette::Report>() {
+            eprintln!("{report:?}");
+        } else {
+            eprintln!("error: {error:#}");
+        }
         std::process::exit(1);
     }
 }
@@ -460,6 +464,28 @@ mod tests {
         match cli.command {
             Some(Command::Run { args, .. }) => {
                 assert_eq!(args, vec!["--watch", "--grep", "slow suite"]);
+            }
+            _ => panic!("expected run command"),
+        }
+    }
+
+    #[test]
+    fn parses_passthrough_args_without_separator() {
+        let cli = Cli::try_parse_from([
+            "please",
+            "--workspace",
+            ".",
+            "run",
+            "test",
+            "-v",
+            "--grep",
+            "slow",
+        ])
+        .expect("parse cli");
+
+        match cli.command {
+            Some(Command::Run { args, .. }) => {
+                assert_eq!(args, vec!["-v", "--grep", "slow"]);
             }
             _ => panic!("expected run command"),
         }
