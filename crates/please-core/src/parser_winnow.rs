@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::io::Read;
@@ -7,8 +8,33 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Context, Result};
+use miette::{miette, LabeledSpan};
 
 use crate::model::{PleaseFile, PleaseSection, RunSpec, TaskMode, TaskSpec};
+
+thread_local! {
+    static DSL_SOURCE: RefCell<Option<String>> = const { RefCell::new(None) };
+}
+
+#[derive(Debug)]
+struct DslSourceGuard;
+
+impl DslSourceGuard {
+    fn set(source: String) -> Self {
+        DSL_SOURCE.with(|slot| {
+            *slot.borrow_mut() = Some(source);
+        });
+        Self
+    }
+}
+
+impl Drop for DslSourceGuard {
+    fn drop(&mut self) {
+        DSL_SOURCE.with(|slot| {
+            *slot.borrow_mut() = None;
+        });
+    }
+}
 
 #[derive(Debug, Clone, Default)]
 struct TaskDraft {
@@ -47,6 +73,8 @@ pub fn parse_pleasefile_dsl_with_workspace(
     content: &str,
     workspace_root: Option<&Path>,
 ) -> Result<PleaseFile> {
+    let _source_guard = DslSourceGuard::set(content.to_string());
+
     let mut version: Option<String> = None;
     let mut aliases = BTreeMap::new();
     let mut load_env = Vec::new();
@@ -653,7 +681,40 @@ fn run_dynamic_variable_command(
 }
 
 fn parse_error(line: usize, column: usize, message: String) -> anyhow::Error {
-    anyhow!("DSL parse error at {}:{}: {}", line, column, message)
+    let formatted = format!("DSL parse error at {}:{}: {}", line, column, message);
+
+    DSL_SOURCE.with(|slot| {
+        if let Some(source) = slot.borrow().as_ref() {
+            let offset = line_col_to_offset(source, line, column);
+            let span_end = (offset + 1).min(source.len().max(1));
+            let report = miette!(
+                labels = vec![LabeledSpan::at(offset..span_end, "here")],
+                "{}",
+                formatted
+            )
+            .with_source_code(source.clone());
+            anyhow!(report)
+        } else {
+            anyhow!(formatted)
+        }
+    })
+}
+
+fn line_col_to_offset(source: &str, line: usize, column: usize) -> usize {
+    let mut offset = 0usize;
+    let target_line = line.max(1);
+    let target_col = column.max(1);
+
+    for (idx, raw_line) in source.split('\n').enumerate() {
+        let current_line = idx + 1;
+        if current_line == target_line {
+            let col_offset = target_col.saturating_sub(1).min(raw_line.len());
+            return offset + col_offset;
+        }
+        offset += raw_line.len() + 1;
+    }
+
+    source.len()
 }
 
 #[cfg(test)]
