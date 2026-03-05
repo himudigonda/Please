@@ -14,6 +14,7 @@ use std::time::Duration;
 use aho_corasick::AhoCorasick;
 use anyhow::{anyhow, Context, Result};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
+use notify::{Config as NotifyConfig, Event, RecommendedWatcher, RecursiveMode, Watcher};
 use please_cache::unix_timestamp_secs;
 use please_store::{ArtifactStore, ExecutionRecord};
 use rayon::prelude::*;
@@ -32,6 +33,7 @@ pub struct RunOptions {
     pub force: bool,
     pub no_cache: bool,
     pub explain: bool,
+    pub watch: bool,
     pub force_isolation: bool,
     pub jobs: usize,
     pub passthrough_args: Vec<String>,
@@ -44,6 +46,7 @@ impl Default for RunOptions {
             force: false,
             no_cache: false,
             explain: false,
+            watch: false,
             force_isolation: false,
             jobs: num_cpus::get().max(1),
             passthrough_args: Vec::new(),
@@ -81,6 +84,13 @@ enum ProgressEvent {
     TaskFinished(String, TaskProgressStatus),
 }
 
+#[derive(Debug, Clone)]
+struct WatchContext {
+    watch_roots: Vec<PathBuf>,
+    tracked_inputs: Vec<PathBuf>,
+    ignored_prefixes: Vec<PathBuf>,
+}
+
 pub struct Executor {
     workspace_root: PathBuf,
     config: PleaseFile,
@@ -113,6 +123,14 @@ impl Executor {
     }
 
     pub fn run_target(&self, target: &str, options: &RunOptions) -> Result<RunSummary> {
+        if options.watch {
+            self.run_target_watch(target, options)
+        } else {
+            self.run_target_once(target, options)
+        }
+    }
+
+    fn run_target_once(&self, target: &str, options: &RunOptions) -> Result<RunSummary> {
         if options.force_isolation {
             if !cfg!(target_os = "linux") {
                 return Err(anyhow!(
@@ -198,6 +216,66 @@ impl Executor {
         Ok(summary)
     }
 
+    fn run_target_watch(&self, target: &str, options: &RunOptions) -> Result<RunSummary> {
+        let resolved_target = self.config.resolve_task_name(target)?;
+        let watch_context = self.build_watch_context(&resolved_target)?;
+        if self
+            .config
+            .task
+            .get(&resolved_target)
+            .is_some_and(|task| task.inferred_mode() == TaskMode::Interactive)
+        {
+            eprintln!(
+                "info: task '{}' is interactive; internal watchers may conflict with --watch",
+                resolved_target
+            );
+        }
+
+        let (tx, rx) = mpsc::channel::<notify::Result<Event>>();
+        let mut watcher = RecommendedWatcher::new(
+            move |event| {
+                let _ = tx.send(event);
+            },
+            NotifyConfig::default(),
+        )
+        .context("initializing file watcher")?;
+
+        for path in &watch_context.watch_roots {
+            watcher
+                .watch(path, RecursiveMode::Recursive)
+                .with_context(|| format!("watching path '{}'", path.display()))?;
+        }
+
+        let mut run_options = options.clone();
+        run_options.watch = false;
+        let mut last_summary = self.run_target_once(&resolved_target, &run_options)?;
+        eprintln!("watch: listening for changes...");
+
+        loop {
+            match rx.recv() {
+                Ok(Ok(event)) => {
+                    if !event_has_relevant_change(&event, &watch_context) {
+                        continue;
+                    }
+                    thread::sleep(Duration::from_millis(200));
+                    while let Ok(Ok(event)) = rx.try_recv() {
+                        if event_has_relevant_change(&event, &watch_context) {
+                            // Drain bursty events before rerun.
+                        }
+                    }
+                    eprintln!("watch: change detected, rerunning '{}'", resolved_target);
+                    last_summary = self.run_target_once(&resolved_target, &run_options)?;
+                }
+                Ok(Err(error)) => {
+                    eprintln!("watch: filesystem event error: {}", error);
+                }
+                Err(_) => break,
+            }
+        }
+
+        Ok(last_summary)
+    }
+
     fn preflight_requires(&self, layers: &[Vec<String>]) -> Result<()> {
         let mut checked = BTreeSet::new();
         for layer in layers {
@@ -219,6 +297,57 @@ impl Executor {
             }
         }
         Ok(())
+    }
+
+    fn build_watch_context(&self, target: &str) -> Result<WatchContext> {
+        let layers = self.graph.layers_for_target(target)?;
+        let mut tracked_inputs = BTreeSet::new();
+        let mut ignored_prefixes = BTreeSet::new();
+        ignored_prefixes.insert(self.workspace_root.join(".git"));
+        ignored_prefixes.insert(self.workspace_root.join(".please"));
+
+        for layer in &layers {
+            for task_name in layer {
+                let task = self
+                    .config
+                    .task
+                    .get(task_name)
+                    .ok_or_else(|| anyhow!("task '{}' not found", task_name))?;
+                for output in &task.outputs {
+                    let output_rel = normalize_relative_path(output)?;
+                    ignored_prefixes.insert(self.workspace_root.join(output_rel));
+                }
+                if task.inputs.is_empty() {
+                    continue;
+                }
+                let resolved = resolve_inputs(&self.workspace_root, &task.inputs)?;
+                for input in resolved {
+                    tracked_inputs.insert(self.workspace_root.join(input));
+                }
+            }
+        }
+
+        if tracked_inputs.is_empty() {
+            tracked_inputs.insert(self.workspace_root.clone());
+        }
+
+        let mut watch_roots = BTreeSet::new();
+        for input in &tracked_inputs {
+            if input.is_dir() {
+                watch_roots.insert(input.clone());
+            } else if let Some(parent) = input.parent() {
+                watch_roots.insert(parent.to_path_buf());
+            }
+        }
+        if watch_roots.is_empty() {
+            watch_roots.insert(self.workspace_root.clone());
+        }
+
+        Ok(WatchContext {
+            watch_roots: watch_roots.into_iter().collect(),
+            tracked_inputs: tracked_inputs.into_iter().collect(),
+            ignored_prefixes: ignored_prefixes.into_iter().collect(),
+        })
     }
 
     fn execute_task(
@@ -777,6 +906,18 @@ fn apply_outcome(summary: &mut RunSummary, outcome: TaskOutcome) {
     if !outcome.cache_miss_reasons.is_empty() {
         summary.cache_miss_reasons.insert(task_name, outcome.cache_miss_reasons);
     }
+}
+
+fn event_has_relevant_change(event: &Event, watch_context: &WatchContext) -> bool {
+    for path in &event.paths {
+        if watch_context.ignored_prefixes.iter().any(|prefix| path.starts_with(prefix)) {
+            continue;
+        }
+        if watch_context.tracked_inputs.iter().any(|input| path.starts_with(input)) {
+            return true;
+        }
+    }
+    false
 }
 
 #[derive(Clone)]

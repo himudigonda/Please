@@ -35,6 +35,8 @@ enum Command {
         #[arg(long)]
         no_cache: bool,
         #[arg(long)]
+        watch: bool,
+        #[arg(long)]
         force_isolation: bool,
         #[arg(long)]
         jobs: Option<usize>,
@@ -135,6 +137,7 @@ fn run() -> Result<()> {
             explain,
             force,
             no_cache,
+            watch,
             force_isolation,
             jobs,
             args,
@@ -148,6 +151,7 @@ fn run() -> Result<()> {
                 explain,
                 force,
                 no_cache,
+                watch,
                 force_isolation,
                 passthrough_args: args,
                 ..RunOptions::default()
@@ -182,13 +186,17 @@ fn run() -> Result<()> {
             Ok(())
         }
         Some(Command::Task(raw)) => {
-            let (task, args) = parse_implicit_task_args(raw)?;
+            let invocation = parse_implicit_task_args(raw)?;
             let config = load_and_validate(&workspace)?;
             let cache = LocalArtifactStore::new(cache_root(&workspace))?;
             let executor = Executor::new(&workspace, config, Arc::new(cache))?;
-            let options = RunOptions { passthrough_args: args, ..RunOptions::default() };
+            let options = RunOptions {
+                watch: invocation.watch,
+                passthrough_args: invocation.args,
+                ..RunOptions::default()
+            };
 
-            let summary = executor.run_target(&task, &options)?;
+            let summary = executor.run_target(&invocation.task, &options)?;
             if !summary.cache_hits.is_empty() {
                 println!("cache hits: {}", summary.cache_hits.join(", "));
             }
@@ -203,15 +211,31 @@ fn run() -> Result<()> {
     }
 }
 
-fn parse_implicit_task_args(raw: Vec<String>) -> Result<(String, Vec<String>)> {
+struct ImplicitTaskInvocation {
+    task: String,
+    watch: bool,
+    args: Vec<String>,
+}
+
+fn parse_implicit_task_args(raw: Vec<String>) -> Result<ImplicitTaskInvocation> {
     let mut iter = raw.into_iter();
     let task =
         iter.next().ok_or_else(|| anyhow!("implicit task execution expected a task name"))?;
-    let mut args: Vec<String> = iter.collect();
-    if args.first().is_some_and(|value| value == "--") {
-        args.remove(0);
+    let mut watch = false;
+    let mut args = Vec::new();
+    let mut passthrough_mode = false;
+    for token in iter {
+        if token == "--" {
+            passthrough_mode = true;
+            continue;
+        }
+        if !passthrough_mode && token == "--watch" {
+            watch = true;
+            continue;
+        }
+        args.push(token);
     }
-    Ok((task, args))
+    Ok(ImplicitTaskInvocation { task, watch, args })
 }
 
 fn load_and_validate(workspace: &Path) -> Result<please_core::PleaseFile> {
@@ -355,12 +379,16 @@ mod tests {
             ".",
             "run",
             "build",
+            "--watch",
             "--force-isolation",
         ])
         .expect("parse cli");
 
         match cli.command {
-            Some(Command::Run { force_isolation, .. }) => assert!(force_isolation),
+            Some(Command::Run { force_isolation, watch, .. }) => {
+                assert!(force_isolation);
+                assert!(watch);
+            }
             _ => panic!("expected run command"),
         }
     }
@@ -453,9 +481,25 @@ mod tests {
                 .expect("parse cli");
         match cli.command {
             Some(Command::Task(raw)) => {
-                let (task, args) = parse_implicit_task_args(raw).expect("normalized args");
-                assert_eq!(task, "test");
-                assert_eq!(args, vec!["--grep", "slow"]);
+                let parsed = parse_implicit_task_args(raw).expect("normalized args");
+                assert_eq!(parsed.task, "test");
+                assert!(!parsed.watch);
+                assert_eq!(parsed.args, vec!["--grep", "slow"]);
+            }
+            _ => panic!("expected external subcommand task"),
+        }
+    }
+
+    #[test]
+    fn parses_implicit_task_watch_flag() {
+        let cli = Cli::try_parse_from(["please", "--workspace", ".", "test", "--watch"])
+            .expect("parse cli");
+        match cli.command {
+            Some(Command::Task(raw)) => {
+                let parsed = parse_implicit_task_args(raw).expect("normalized args");
+                assert_eq!(parsed.task, "test");
+                assert!(parsed.watch);
+                assert!(parsed.args.is_empty());
             }
             _ => panic!("expected external subcommand task"),
         }
