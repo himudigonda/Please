@@ -3,7 +3,7 @@
 `Please` is a deterministic task runner for polyglot projects with explicit task contracts (`inputs`, `outputs`, `deps`, `env`, `run`).
 
 ## Status
-Current public prerelease: **`v0.2.0-beta.1`**.
+Current public release: **`v0.2.0`**.
 
 ## Why Please
 - Content-hash invalidation (BLAKE3), not mtime heuristics.
@@ -24,7 +24,7 @@ curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh 
 
 Pin a specific version:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.2.0-beta.1 bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.2.0 bash
 ```
 
 Alternative (clone + local installer):
@@ -128,7 +128,7 @@ please --workspace . run ci
   Use `--explain` and check changed `inputs`, `env`, or `run` content.
 - Install script pulled wrong version:
   Pin explicitly with:
-  `curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.2.0-beta.1 bash`
+  `curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.2.0 bash`
 
 ## Core docs
 - [CONTRIBUTING.md](CONTRIBUTING.md)
