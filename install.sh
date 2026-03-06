@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="${PLEASE_REPO:-himudigonda/Please}"
+REPO="${BROSKI_REPO:-himudigonda/Broski}"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
-VERSION="${PLEASE_VERSION:-}"
-CHANNEL="${PLEASE_CHANNEL:-latest}"
+VERSION="${BROSKI_VERSION:-}"
+CHANNEL="${BROSKI_CHANNEL:-latest}"
 temp_dir=""
 
 fail() {
@@ -61,7 +61,8 @@ resolve_tag() {
       python3 -c '
 import json, os, sys
 
-channel = os.environ.get("PLEASE_CHANNEL", "latest").lower()
+channel = os.environ.get("BROSKI_CHANNEL", "latest")
+channel = channel.lower()
 prefer_stable = channel == "stable"
 
 try:
@@ -86,7 +87,7 @@ print(candidate)
   fi
 
   if [ -z "$tag" ]; then
-    fail "unable to resolve release tag from GitHub API; set PLEASE_VERSION explicitly"
+    fail "unable to resolve release tag from GitHub API; set BROSKI_VERSION explicitly"
   fi
 
   echo "$tag"
@@ -124,7 +125,7 @@ main() {
   local target tag asset base_url temp_dir checksum_file
   target="$(resolve_target)"
   tag="$(resolve_tag)"
-  asset="please-${tag}-${target}.tar.gz"
+  asset="broski-${tag}-${target}.tar.gz"
   base_url="https://github.com/${REPO}/releases/download/${tag}"
 
   temp_dir="$(mktemp -d)"
@@ -140,13 +141,13 @@ main() {
   verify_checksum "$checksum_file" "${temp_dir}/${asset}"
 
   tar -xzf "${temp_dir}/${asset}" -C "$temp_dir"
-  [ -f "${temp_dir}/please" ] || fail "archive missing please binary"
+  [ -f "${temp_dir}/broski" ] || fail "archive missing broski binary"
 
   mkdir -p "$INSTALL_DIR"
-  install -m 0755 "${temp_dir}/please" "${INSTALL_DIR}/please"
+  install -m 0755 "${temp_dir}/broski" "${INSTALL_DIR}/broski"
 
-  echo "Installed please to ${INSTALL_DIR}/please"
-  echo "Docs: https://himudigonda.me/please_docs/"
+  echo "Installed broski to ${INSTALL_DIR}/broski"
+  echo "Docs: https://himudigonda.me/broski_docs/"
   if [[ ":$PATH:" != *":${INSTALL_DIR}:"* ]]; then
     echo "Add this to your shell profile:"
     echo "  export PATH=\"${INSTALL_DIR}:\$PATH\""

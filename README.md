@@ -1,7 +1,7 @@
-# Please
+# Broski
 
-[![Version](https://img.shields.io/badge/version-v0.5.0-blue)](https://github.com/himudigonda/Please/releases/tag/v0.5.0)
-[![CI](https://img.shields.io/github/actions/workflow/status/himudigonda/Please/ci.yml?branch=main&label=build)](https://github.com/himudigonda/Please/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-v0.5.1-blue)](https://github.com/himudigonda/Broski/releases/tag/v0.5.1)
+[![CI](https://img.shields.io/github/actions/workflow/status/himudigonda/Broski/ci.yml?branch=main&label=build)](https://github.com/himudigonda/Broski/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
 [![Rust](https://img.shields.io/badge/rust-1.78%2B-orange)](https://www.rust-lang.org/)
 
@@ -10,19 +10,19 @@ Deterministic task runner and build orchestrator for teams replacing Make/Just i
 ## Install in 10 Seconds
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | bash
-please --version
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Broski/main/install.sh | bash
+broski --version
 ```
 
 Pinned install:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.5.0 bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Broski/main/install.sh | BROSKI_VERSION=v0.5.1 bash
 ```
 
-## Why Please
+## Why Broski
 
-| Capability | Make | Just | Please |
+| Capability | Make | Just | Broski |
 | --- | --- | --- | --- |
 | Content-based invalidation | No | No | Yes (BLAKE3) |
 | Cache miss explainability | No | No | Yes (`--explain`) |
@@ -33,16 +33,16 @@ curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh 
 ## Quickstart
 
 ```bash
-please --workspace . list
-please --workspace . ci
-please --workspace . run ci --explain
-please --workspace . run test --watch
+broski --workspace . list
+broski --workspace . ci
+broski --workspace . run ci --explain
+broski --workspace . run test --watch
 ```
 
 ## Docs Portal
 
-- Public docs: [https://himudigonda.me/please_docs/](https://himudigonda.me/please_docs/)
-- Standalone docs origin: [https://please-docs.vercel.app/please_docs/](https://please-docs.vercel.app/please_docs/)
+- Public docs: [https://himudigonda.me/broski_docs/](https://himudigonda.me/broski_docs/)
+- Standalone docs origin: [https://broski-docs.vercel.app/broski_docs/](https://broski-docs.vercel.app/broski_docs/)
 
 ## Highlights in v0.5
 
@@ -56,7 +56,7 @@ please --workspace . run test --watch
 ## Repo Layout
 
 - `crates/` — core engine, CLI, cache, store
-- `pleasefile` — dogfooding orchestration
+- `broskifile` — dogfooding orchestration
 - `website/` — docs portal (Docusaurus)
 - `docs/legacy/` — archived markdown docs
 - `examples/` — runnable end-to-end samples
@@ -67,7 +67,7 @@ please --workspace . run test --watch
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace
-./target/debug/please --workspace . run ci --explain
+./target/debug/broski --workspace . run ci --explain
 ```
 
 Docs workflow:
@@ -83,8 +83,8 @@ npm run lint:all
 If a command fails, run:
 
 ```bash
-please --help
-please doctor --no-repair
+broski --help
+broski doctor --no-repair
 ```
 
 Then check the portal troubleshooting and architecture sections.

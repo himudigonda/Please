@@ -1,0 +1,23 @@
+version = "0.5"
+
+test:
+    @in go.mod cmd/**/*.go
+    @out .broski/stamps/test.ok
+    @isolation off
+    mkdir -p .broski/stamps
+    go test ./...
+    printf 'ok\n' > .broski/stamps/test.ok
+
+build: test
+    @in go.mod cmd/**/*.go
+    @out dist/go-http
+    @isolation off
+    mkdir -p dist
+    go build -o dist/go-http ./cmd/server
+
+ci: build
+    @in broskifile
+    @out .broski/stamps/ci.ok
+    @isolation off
+    mkdir -p .broski/stamps
+    printf 'ok\n' > .broski/stamps/ci.ok

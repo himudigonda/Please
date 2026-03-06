@@ -6,8 +6,8 @@
       "label": "Quickstart",
       "items": [
         "quickstart/install",
-        "quickstart/first-pleasefile",
-        "quickstart/make-just-please"
+        "quickstart/first-broskifile",
+        "quickstart/make-just-broski"
       ]
     },
     {

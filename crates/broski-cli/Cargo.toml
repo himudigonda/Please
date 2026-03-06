@@ -1,0 +1,23 @@
+[package]
+name = "broski-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "broski"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+miette.workspace = true
+which.workspace = true
+broski-cache = { path = "../broski-cache" }
+broski-core = { path = "../broski-core" }
+broski-store = { path = "../broski-store" }
+
+[dev-dependencies]
+tempfile.workspace = true
+assert_cmd = "2.0"
+predicates = "3.0"

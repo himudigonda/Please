@@ -9,7 +9,7 @@ Use this page for verified install commands and post-install checks.
 ## Latest Stable
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Broski/main/install.sh | bash
 ```
 
 Expected output includes:
@@ -21,7 +21,7 @@ Expected output includes:
 ## Pinned Version
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.5.0 bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Broski/main/install.sh | BROSKI_VERSION=v0.5.1 bash
 ```
 
 Use pinned install for reproducible onboarding and CI bootstrap scripts.
@@ -29,34 +29,34 @@ Use pinned install for reproducible onboarding and CI bootstrap scripts.
 ## Verify
 
 ```bash
-please --version
-please --workspace . list
+broski --version
+broski --workspace . list
 ```
 
 Expected behavior:
 
-- `please --version` prints installed version
-- `please --workspace . list` shows available tasks in current repo
+- `broski --version` prints installed version
+- `broski --workspace . list` shows available tasks in current repo
 
 ## Smoke test
 
 Create a temporary task file and run once:
 
-```bash title="pleasefile"
+```bash title="broskifile"
 version = "0.5"
 
 hello:
     @mode interactive
-    echo "please is installed"
+    echo "broski is installed"
 ```
 
 ```bash
-please hello
+broski hello
 ```
 
 Expected output:
 
-- `please is installed`
+- `broski is installed`
 
 ## Supported Release Targets
 
@@ -66,7 +66,7 @@ Expected output:
 ## Next
 
 - [30-Second Quickstart](./thirty-second-quickstart)
-- [Your first pleasefile](./first-pleasefile)
+- [Your first broskifile](./first-broskifile)
 - [Migration Playbook](../operations/migration)
 
-Need help? Visit [https://himudigonda.me/please_docs/](https://himudigonda.me/please_docs/).
+Need help? Visit [https://himudigonda.me/broski_docs/](https://himudigonda.me/broski_docs/).

@@ -1,0 +1,16 @@
+[package]
+name = "broski-cache"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+blake3.workspace = true
+broski-store = { path = "../broski-store" }
+rusqlite.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

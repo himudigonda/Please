@@ -22,7 +22,7 @@ export default function ToolComparison({
 }: Props): JSX.Element {
   return (
     <Tabs groupId="tool-compare" queryString>
-      <TabItem value="please" label="Please">
+      <TabItem value="broski" label="Broski">
         <CodeBlock language={pleaseLanguage}>{pleaseCode}</CodeBlock>
       </TabItem>
       <TabItem value="make" label="Make">

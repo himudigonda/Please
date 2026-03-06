@@ -1,9 +1,0 @@
-version = "0.5"
-
-hello:
-    @in pleasefile
-    @out .please/stamps/hello.ok
-    @isolation off
-    mkdir -p .please/stamps
-    echo 'hello from please'
-    printf 'ok\n' > .please/stamps/hello.ok

@@ -1,0 +1,23 @@
+version = "0.5"
+
+test:
+    @in src/**/*.py tests/**/*.py
+    @out .broski/stamps/test.ok
+    @isolation off
+    mkdir -p .broski/stamps
+    python3 -m unittest discover -s tests -p 'test_*.py'
+    printf 'ok\n' > .broski/stamps/test.ok
+
+package: test
+    @in src/**/*.py
+    @out dist/python-cli.tar
+    @isolation off
+    mkdir -p dist
+    tar -cf dist/python-cli.tar src
+
+ci: package
+    @in broskifile
+    @out .broski/stamps/ci.ok
+    @isolation off
+    mkdir -p .broski/stamps
+    printf 'ok\n' > .broski/stamps/ci.ok

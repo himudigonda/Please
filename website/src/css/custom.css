@@ -1,55 +1,67 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
 
 :root {
-  --eclipse-bg: #ffffff;
-  --eclipse-surface: #f8fafc;
-  --eclipse-ink: #0f172a;
-  --eclipse-muted: #475569;
-  --eclipse-blue: #2563eb;
+  --ifm-font-family-base: 'Google Sans', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --ifm-code-font-size: 92%;
 
-  --ifm-font-family-base: 'Google Sans', sans-serif;
-  --ifm-color-primary: var(--eclipse-blue);
+  --ifm-color-primary: #2563eb;
   --ifm-color-primary-dark: #1d4ed8;
   --ifm-color-primary-darker: #1e40af;
   --ifm-color-primary-darkest: #1e3a8a;
   --ifm-color-primary-light: #3b82f6;
   --ifm-color-primary-lighter: #60a5fa;
   --ifm-color-primary-lightest: #93c5fd;
-  --ifm-background-color: var(--eclipse-bg);
-  --ifm-background-surface-color: var(--eclipse-surface);
+
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #f8fafc;
   --ifm-navbar-background-color: #ffffff;
-  --ifm-footer-background-color: #f1f5f9;
-  --ifm-font-color-base: var(--eclipse-ink);
-  --ifm-font-color-secondary: var(--eclipse-muted);
-  --ifm-code-font-size: 92%;
-  --docusaurus-highlighted-code-line-bg: rgba(37, 99, 235, 0.1);
+  --ifm-footer-background-color: #f8fafc;
+  --ifm-font-color-base: #0f172a;
+  --ifm-font-color-secondary: #475569;
+  --ifm-heading-color: #0f172a;
+  --ifm-link-color: #1d4ed8;
+
+  --ifm-code-background: #f1f5f9;
+  --docusaurus-highlighted-code-line-bg: rgba(37, 99, 235, 0.12);
 }
 
 [data-theme='dark'] {
-  --ifm-color-primary: #60a5fa;
-  --ifm-color-primary-dark: #3b82f6;
-  --ifm-color-primary-darker: #2563eb;
-  --ifm-color-primary-darkest: #1d4ed8;
-  --ifm-color-primary-light: #93c5fd;
-  --ifm-color-primary-lighter: #bfdbfe;
-  --ifm-color-primary-lightest: #dbeafe;
-  --ifm-background-color: #0b1220;
-  --ifm-background-surface-color: #111827;
-  --ifm-navbar-background-color: rgba(11, 18, 32, 0.92);
-  --ifm-footer-background-color: #0f172a;
-  --ifm-font-color-base: #e5e7eb;
-  --ifm-font-color-secondary: #9ca3af;
-  --docusaurus-highlighted-code-line-bg: rgba(96, 165, 250, 0.16);
-  --ifm-code-background: #1f2937;
+  --ifm-color-primary: #58a6ff;
+  --ifm-color-primary-dark: #388bfd;
+  --ifm-color-primary-darker: #1f6feb;
+  --ifm-color-primary-darkest: #1158c7;
+  --ifm-color-primary-light: #79c0ff;
+  --ifm-color-primary-lighter: #a5d6ff;
+  --ifm-color-primary-lightest: #cae8ff;
+
+  --ifm-background-color: #0d1117;
+  --ifm-background-surface-color: #161b22;
+  --ifm-navbar-background-color: rgba(13, 17, 23, 0.95);
+  --ifm-footer-background-color: #161b22;
+  --ifm-font-color-base: #e6edf3;
+  --ifm-font-color-secondary: #9da7b3;
+  --ifm-heading-color: #f0f6fc;
+  --ifm-link-color: #79c0ff;
+
+  --ifm-code-background: #1f2630;
+  --docusaurus-highlighted-code-line-bg: rgba(88, 166, 255, 0.16);
 }
 
 .navbar {
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(37, 99, 235, 0.18);
+  border-bottom: 1px solid rgba(37, 99, 235, 0.16);
+}
+
+[data-theme='dark'] .navbar {
+  border-bottom: 1px solid rgba(88, 166, 255, 0.2);
 }
 
 .footer {
-  border-top: 1px solid rgba(37, 99, 235, 0.2);
+  border-top: 1px solid rgba(37, 99, 235, 0.14);
+}
+
+[data-theme='dark'] .footer {
+  border-top: 1px solid rgba(88, 166, 255, 0.2);
 }
 
 .markdown h1,
@@ -59,25 +71,35 @@
 }
 
 .theme-code-block,
-.prism-code {
-  border: 1px solid rgba(37, 99, 235, 0.2);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+.prism-code,
+.shiki {
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  border-radius: 10px;
 }
 
 [data-theme='dark'] .theme-code-block,
-[data-theme='dark'] .prism-code {
-  border: 1px solid rgba(96, 165, 250, 0.35);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+[data-theme='dark'] .prism-code,
+[data-theme='dark'] .shiki {
+  border: 1px solid rgba(88, 166, 255, 0.26);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
 }
 
 .theme-code-block pre,
-.theme-code-block code {
+.theme-code-block code,
+.shiki code {
   font-size: 0.95rem;
   line-height: 1.65;
 }
 
-[data-theme='dark'] .token.plain {
-  color: #e5e7eb !important;
+[data-theme='dark'] .theme-code-block pre code,
+[data-theme='dark'] .shiki code {
+  color: #e6edf3;
+}
+
+[data-theme='dark'] .token.operator,
+[data-theme='dark'] .token.punctuation {
+  color: #c9d1d9;
 }
 
 .eclipse-callout {
@@ -85,4 +107,8 @@
   background: rgba(37, 99, 235, 0.08);
   padding: 0.9rem 1rem;
   border-radius: 8px;
+}
+
+[data-theme='dark'] .eclipse-callout {
+  background: rgba(88, 166, 255, 0.12);
 }

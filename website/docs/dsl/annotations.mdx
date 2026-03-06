@@ -8,7 +8,7 @@ This page defines each annotation, its purpose, constraints, and common mistakes
 
 ## `@in` input contracts
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @in src/**/* Cargo.toml Cargo.lock
 ```
 
@@ -21,7 +21,7 @@ Use narrow patterns. Prefer `src/**/* Cargo.toml` over `**/*`.
 
 ## `@out` output contracts
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @out dist/app
 @out reports/test.xml
 ```
@@ -35,7 +35,7 @@ If a task should be cached, declare explicit outputs.
 
 ## `@env` runtime environment
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @env RUST_LOG=info
 @env HOME
 ```
@@ -49,7 +49,7 @@ Forms:
 
 ## `@secret_env` secret environment keys
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @secret_env GITHUB_TOKEN
 @secret_env AWS_SECRET_ACCESS_KEY
 ```
@@ -58,11 +58,11 @@ Forms:
 - Effect: values are redacted in terminal/log/explain paths.
 - Explain reason stays generic: `cache miss: secret env changed`.
 
-Do not put literal secrets in `pleasefile`.
+Do not put literal secrets in `broskifile`.
 
 ## `@dir` working directory override
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @dir services/api
 ```
 
@@ -74,7 +74,7 @@ Use this instead of prefixing every command with `cd ... &&`.
 
 ## `@mode` execution mode
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @mode graph
 @mode interactive
 ```
@@ -91,7 +91,7 @@ Inference when omitted:
 
 ## `@isolation` sandbox policy
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @isolation strict
 @isolation best_effort
 @isolation off
@@ -105,7 +105,7 @@ Inference when omitted:
 
 ## `@requires` tool preflight checks
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @requires cargo docker python3
 ```
 
@@ -117,16 +117,16 @@ Use this on setup/dev/deploy tasks to reduce trial-and-error failures.
 
 ## `@private` hidden task
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @private
 ```
 
-- Purpose: hide helper tasks from `please list`.
+- Purpose: hide helper tasks from `broski list`.
 - Use for internal wiring tasks not meant for direct invocation.
 
 ## `@confirm` safety prompt
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @confirm "Drop local database? Type y to continue"
 ```
 
@@ -140,7 +140,7 @@ In non-interactive contexts, this should fail safe.
 
 `@load` is a top-level directive (not task-scoped).
 
-```bash title="pleasefile"
+```bash title="broskifile"
 @load .env
 ```
 
@@ -150,7 +150,7 @@ In non-interactive contexts, this should fail safe.
 
 ## Full example
 
-```bash title="pleasefile"
+```bash title="broskifile"
 version = "0.5"
 @load .env
 

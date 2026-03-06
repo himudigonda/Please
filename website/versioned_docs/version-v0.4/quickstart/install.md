@@ -7,20 +7,20 @@ sidebar_position: 1
 ## Latest Stable
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Broski/main/install.sh | bash
 ```
 
 ## Pinned Version
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/himudigonda/Please/main/install.sh | PLEASE_VERSION=v0.5.0 bash
+curl -fsSL https://raw.githubusercontent.com/himudigonda/Broski/main/install.sh | BROSKI_VERSION=v0.5.0 bash
 ```
 
 ## Verify
 
 ```bash
-please --version
-please --workspace . list
+broski --version
+broski --workspace . list
 ```
 
 ## Supported Release Targets
@@ -28,4 +28,4 @@ please --workspace . list
 - `x86_64-unknown-linux-gnu`
 - `aarch64-apple-darwin`
 
-Need help? Visit [https://himudigonda.me/please_docs/](https://himudigonda.me/please_docs/).
+Need help? Visit [https://himudigonda.me/broski_docs/](https://himudigonda.me/broski_docs/).

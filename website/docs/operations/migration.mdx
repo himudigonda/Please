@@ -2,11 +2,11 @@
 sidebar_position: 2
 ---
 
-# Migration Playbook (Make/Just -> Please)
+# Migration Playbook (Make/Just -> Broski)
 
 This guide is for teams migrating real projects without downtime.
 
-## What problems Please solves
+## What problems Broski solves
 
 1. Rebuild ambiguity: `--explain` gives concrete cache miss reasons.
 2. Timestamp fragility: graph fingerprints are content-based.
@@ -14,7 +14,7 @@ This guide is for teams migrating real projects without downtime.
 4. Hidden environment drift: explicit `@env`, `@secret_env`, `@load`.
 5. Manual dependency ordering: explicit task graph.
 
-## What Please does not solve
+## What Broski does not solve
 
 1. Remote/distributed cache orchestration.
 2. Automatic semantic dependency inference.
@@ -22,17 +22,17 @@ This guide is for teams migrating real projects without downtime.
 
 ## Migration strategy
 
-1. Keep current Make/Just runner while bootstrapping Please.
+1. Keep current Make/Just runner while bootstrapping Broski.
 2. Port one CI-critical flow (`build`, `test`, `ci`) first.
 3. Add strict contracts (`@in`, `@out`) to graph tasks.
 4. Validate behavior using `--dry-run` and `--explain`.
 5. Port developer workflows (`dev`, `watch`, `serve`) as interactive tasks.
-6. Switch CI entrypoint to Please after parity.
+6. Switch CI entrypoint to Broski after parity.
 7. Remove old runner after two green cycles.
 
 ## Concept mapping
 
-| Existing concept | Make | Just | Please |
+| Existing concept | Make | Just | Broski |
 | --- | --- | --- | --- |
 | Task | target | recipe | task header |
 | Dependency edge | target deps | recipe deps | `task: dep_a dep_b` |
@@ -56,7 +56,7 @@ test:
 ci: build test
 ```
 
-```bash title="pleasefile"
+```bash title="broskifile"
 version = "0.5"
 
 build:
@@ -66,9 +66,9 @@ build:
 
 test: build
     @in src/**/* tests/**/* Cargo.toml Cargo.lock
-    @out .please/stamps/test.ok
+    @out .broski/stamps/test.ok
     cargo test
-    touch .please/stamps/test.ok
+    touch .broski/stamps/test.ok
 
 ci: test
     @mode interactive
@@ -78,18 +78,18 @@ ci: test
 Verify:
 
 ```bash
-please run ci --dry-run --explain
-please run ci --explain
+broski run ci --dry-run --explain
+broski run ci --explain
 ```
 
-### Pattern B: Just args -> Please params
+### Pattern B: Just args -> Broski params
 
 ```makefile title="justfile"
 build target mode="release":
   cargo build --bin {{target}} --{{mode}}
 ```
 
-```bash title="pleasefile"
+```bash title="broskifile"
 build [target] [mode="release"]:
     @in src/**/* Cargo.toml
     @out dist/{{ target }}
@@ -99,8 +99,8 @@ build [target] [mode="release"]:
 Run:
 
 ```bash
-please build api
-please build api debug
+broski build api
+broski build api debug
 ```
 
 ### Pattern C: setup + dev workflow
@@ -114,7 +114,7 @@ dev:
   docker compose up
 ```
 
-```bash title="pleasefile"
+```bash title="broskifile"
 setup:
     @mode interactive
     @requires python3 npm
@@ -159,16 +159,16 @@ Fix: use implicit/external separation correctly:
 
 ```bash
 # engine flags
-please setup --explain --dry-run
+broski setup --explain --dry-run
 
 # task-level passthrough
-please setup -- --verbose
+broski setup -- --verbose
 ```
 
 ## CI migration checklist
 
-- [ ] `please run ci --dry-run` succeeds
-- [ ] `please run ci --explain` shows deterministic reasons
+- [ ] `broski run ci --dry-run` succeeds
+- [ ] `broski run ci --explain` shows deterministic reasons
 - [ ] build/test tasks declare `@in` and `@out`
 - [ ] interactive tasks explicitly use `@mode interactive`
 - [ ] required binaries covered by `@requires`
@@ -176,7 +176,7 @@ please setup -- --verbose
 
 ## Local developer checklist
 
-- [ ] `please list` shows clean public task surface
+- [ ] `broski list` shows clean public task surface
 - [ ] destructive tasks protected with `@confirm`
 - [ ] private internals hidden with `@private`
 - [ ] onboarding path documented in `README` and quickstart
@@ -186,8 +186,8 @@ please setup -- --verbose
 If migration fails in CI:
 
 1. keep old runner as fallback entrypoint;
-2. disable Please entrypoint for one cycle;
-3. run `please run ci --explain` on failing commit;
+2. disable Broski entrypoint for one cycle;
+3. run `broski run ci --explain` on failing commit;
 4. fix contracts (`@in/@out/env`) and re-enable.
 
 ## Related docs

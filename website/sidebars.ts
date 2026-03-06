@@ -9,14 +9,14 @@ const sidebars: SidebarsConfig = {
       items: [
         'quickstart/thirty-second-quickstart',
         'quickstart/install',
-        'quickstart/first-pleasefile',
-        'quickstart/make-just-please',
+        'quickstart/first-broskifile',
+        'quickstart/make-just-broski',
       ],
     },
     {
       type: 'category',
       label: 'Architecture',
-      items: ['architecture/why-please', 'architecture/engine-overview', 'architecture/cache-explain'],
+      items: ['architecture/why-broski', 'architecture/engine-overview', 'architecture/cache-explain'],
     },
     {
       type: 'category',

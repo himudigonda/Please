@@ -1,0 +1,22 @@
+version = "0.5"
+
+test:
+    @in package.json src/**/*.js
+    @out .broski/stamps/test.ok
+    @isolation off
+    mkdir -p .broski/stamps
+    npm test
+    printf 'ok\n' > .broski/stamps/test.ok
+
+build: test
+    @in package.json src/**/*.js scripts/build.mjs
+    @out dist/src
+    @isolation off
+    npm run build
+
+ci: build
+    @in broskifile
+    @out .broski/stamps/ci.ok
+    @isolation off
+    mkdir -p .broski/stamps
+    printf 'ok\n' > .broski/stamps/ci.ok

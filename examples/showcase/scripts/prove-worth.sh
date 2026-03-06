@@ -8,15 +8,15 @@ BACKEND_FILE="${ROOT_DIR}/backend/src/main.rs"
 STYLE_BACKUP="$(mktemp)"
 BACKEND_BACKUP="$(mktemp)"
 
-resolve_please_bin() {
-  if [ -n "${PLEASE_BIN:-}" ] && [ -x "${PLEASE_BIN:-}" ]; then
-    printf '%s\n' "${PLEASE_BIN}"
+resolve_broski_bin() {
+  if [ -n "${BROSKI_BIN:-}" ] && [ -x "${BROSKI_BIN:-}" ]; then
+    printf '%s\n' "${BROSKI_BIN}"
     return
   fi
 
   local candidates=(
-    "${ROOT_DIR}/../../target/debug/please"
-    "${ROOT_DIR}/../../../../../target/debug/please"
+    "${ROOT_DIR}/../../target/debug/broski"
+    "${ROOT_DIR}/../../../../../target/debug/broski"
   )
 
   local candidate
@@ -27,16 +27,16 @@ resolve_please_bin() {
     fi
   done
 
-  if command -v please >/dev/null 2>&1; then
-    command -v please
+  if command -v broski >/dev/null 2>&1; then
+    command -v broski
     return
   fi
 
-  echo "unable to resolve Please binary; set PLEASE_BIN explicitly" >&2
+  echo "unable to resolve Broski binary; set BROSKI_BIN explicitly" >&2
   exit 1
 }
 
-PLEASE_BIN="$(resolve_please_bin)"
+BROSKI_BIN="$(resolve_broski_bin)"
 
 mkdir -p "${ROOT_DIR}/artifacts"
 : > "$LOG_FILE"
@@ -53,7 +53,7 @@ run_and_log() {
   local label="$1"
   shift
   echo "=== ${label} ===" | tee -a "$LOG_FILE"
-  (cd "$ROOT_DIR" && "$PLEASE_BIN" --workspace . "$@") 2>&1 | tee -a "$LOG_FILE"
+  (cd "$ROOT_DIR" && "$BROSKI_BIN" --workspace . "$@") 2>&1 | tee -a "$LOG_FILE"
   echo | tee -a "$LOG_FILE"
 }
 

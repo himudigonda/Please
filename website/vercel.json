@@ -2,52 +2,52 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/please_docs/",
+      "destination": "/broski_docs/",
       "permanent": true
     },
     {
-      "source": "/please_docs/",
-      "destination": "/please_docs",
+      "source": "/broski_docs",
+      "destination": "/broski_docs/",
       "permanent": true
     },
     {
       "source": "/quickstart",
-      "destination": "/quickstart/install",
+      "destination": "/broski_docs/quickstart/install",
       "permanent": true
     },
     {
       "source": "/architecture",
-      "destination": "/architecture/why-please",
+      "destination": "/broski_docs/architecture/why-broski",
       "permanent": true
     },
     {
       "source": "/dsl",
-      "destination": "/dsl/overview",
+      "destination": "/broski_docs/dsl/overview",
       "permanent": true
     },
     {
       "source": "/cli",
-      "destination": "/cli/commands",
+      "destination": "/broski_docs/cli/commands",
       "permanent": true
     },
     {
       "source": "/operations",
-      "destination": "/operations/migration",
+      "destination": "/broski_docs/operations/migration",
       "permanent": true
     },
     {
       "source": "/releases",
-      "destination": "/releases/v0.5",
+      "destination": "/broski_docs/releases/v0.5",
       "permanent": true
     }
   ],
   "rewrites": [
     {
-      "source": "/please_docs",
+      "source": "/broski_docs",
       "destination": "/"
     },
     {
-      "source": "/please_docs/:path*",
+      "source": "/broski_docs/:path*",
       "destination": "/:path*"
     }
   ]

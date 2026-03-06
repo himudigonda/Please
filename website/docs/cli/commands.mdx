@@ -9,23 +9,23 @@ This page is full command reference. It is intentionally dense.
 ## Command forms
 
 ```bash
-please <task> [task-args...] [flags]
-please run <task> [task-args...] [flags]
-please list
-please graph <task> --format tree|dot
-please doctor [--repair|--no-repair]
-please cache prune --max-size <MB>
+broski <task> [task-args...] [flags]
+broski run <task> [task-args...] [flags]
+broski list
+broski graph <task> --format tree|dot
+broski doctor [--repair|--no-repair]
+broski cache prune --max-size <MB>
 ```
 
 ## Resolution rules
 
 1. Subcommands win over task names.
-2. Use `please run <task>` when you want explicit task resolution.
+2. Use `broski run <task>` when you want explicit task resolution.
 3. Reserved names are blocked as task names: `run`, `list`, `graph`, `doctor`, `cache`, `help`, `version`.
 
 ## Run behavior flags
 
-These flags apply to `please <task>` and `please run <task>`.
+These flags apply to `broski <task>` and `broski run <task>`.
 
 | Flag | Default | Effect | Notes |
 | --- | --- | --- | --- |
@@ -39,28 +39,28 @@ These flags apply to `please <task>` and `please run <task>`.
 
 ### Important parsing detail
 
-For implicit invocation (`please setup`), Please consumes engine flags itself:
+For implicit invocation (`broski setup`), Broski consumes engine flags itself:
 
 ```bash
-please setup --explain --dry-run
+broski setup --explain --dry-run
 ```
 
 To pass a literal flag to the underlying task command, use `--`:
 
 ```bash
-please setup -- --explain
+broski setup -- --explain
 ```
 
 ## Subcommands
 
-### `please list`
+### `broski list`
 
-List tasks and aliases from the loaded `pleasefile`.
+List tasks and aliases from the loaded `broskifile`.
 
 - `@private` tasks are hidden from default listing.
 - Task descriptions are surfaced from preceding comments in DSL docs.
 
-### `please run <task>` and `please <task>`
+### `broski run <task>` and `broski <task>`
 
 Execute a target and its dependency graph.
 
@@ -70,26 +70,26 @@ Execute a target and its dependency graph.
 Examples:
 
 ```bash
-please run ci --explain
-please ci --jobs=8
-please run build api release --force-isolation
-please test -- --grep slow
+broski run ci --explain
+broski ci --jobs=8
+broski run build api release --force-isolation
+broski test -- --grep slow
 ```
 
-### `please graph <task> --format tree|dot`
+### `broski graph <task> --format tree|dot`
 
 Show dependency graph for a target.
 
 ```bash
-please graph ci --format tree
-please graph ci --format dot > graph.dot
+broski graph ci --format tree
+broski graph ci --format dot > graph.dot
 ```
 
 Use `dot` output for Graphviz rendering.
 
-### `please doctor`
+### `broski doctor`
 
-Check runtime state and lock health under `.please/runtime`.
+Check runtime state and lock health under `.broski/runtime`.
 
 | Mode | Behavior |
 | --- | --- |
@@ -99,7 +99,7 @@ Check runtime state and lock health under `.please/runtime`.
 
 When an active lock is live, doctor refuses destructive cleanup.
 
-### `please cache prune --max-size <MB>`
+### `broski cache prune --max-size <MB>`
 
 Prune local cache store to size budget.
 
@@ -107,7 +107,7 @@ Prune local cache store to size budget.
 - Example:
 
 ```bash
-please cache prune --max-size 512
+broski cache prune --max-size 512
 ```
 
 Output reports objects pruned, bytes freed, and remaining size.
@@ -133,26 +133,26 @@ When `--explain` is enabled, reasons are printed per task, for example:
 ### Validate a migration without running
 
 ```bash
-please run ci --dry-run --explain
+broski run ci --dry-run --explain
 ```
 
 ### Rebuild once, then return to normal cache flow
 
 ```bash
-please run build --force
-please run build --explain
+broski run build --force
+broski run build --explain
 ```
 
 ### Run high-parallelism on large graph
 
 ```bash
-please run ci --jobs 12
+broski run ci --jobs 12
 ```
 
 ### Interactive task with task-level passthrough
 
 ```bash
-please dev -- --host 0.0.0.0
+broski dev -- --host 0.0.0.0
 ```
 
 ## Failure behavior
@@ -164,14 +164,14 @@ please dev -- --host 0.0.0.0
 
 ## Make/Just mapping
 
-| Intent | Make/Just pattern | Please command |
+| Intent | Make/Just pattern | Broski command |
 | --- | --- | --- |
-| Show tasks | `make help` / `just --list` | `please list` |
-| Run pipeline | `make ci` / `just ci` | `please ci` |
-| Render dependency graph | manual / limited | `please graph ci --format tree` |
-| Force execution | phony/manual | `please run ci --force` |
-| Explain rebuilds | not first-class | `please run ci --explain` |
-| Cache trim | manual cleanup scripts | `please cache prune --max-size 512` |
+| Show tasks | `make help` / `just --list` | `broski list` |
+| Run pipeline | `make ci` / `just ci` | `broski ci` |
+| Render dependency graph | manual / limited | `broski graph ci --format tree` |
+| Force execution | phony/manual | `broski run ci --force` |
+| Explain rebuilds | not first-class | `broski run ci --explain` |
+| Cache trim | manual cleanup scripts | `broski cache prune --max-size 512` |
 
 ## Related pages
 

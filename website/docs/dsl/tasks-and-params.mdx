@@ -8,7 +8,7 @@ This page covers task declaration syntax, dependency wiring, parameter binding, 
 
 ## Task header grammar
 
-```bash title="pleasefile"
+```bash title="broskifile"
 task_name:
 task_name: dep_a dep_b
 build [target] [mode="release"]: lint test
@@ -24,7 +24,7 @@ Header parts:
 
 ### Required parameter
 
-```bash title="pleasefile"
+```bash title="broskifile"
 build [target]:
     cargo build --bin {{ target }}
 ```
@@ -34,7 +34,7 @@ build [target]:
 
 ### Defaulted parameter
 
-```bash title="pleasefile"
+```bash title="broskifile"
 build [target] [mode="release"]:
     cargo build --bin {{ target }} --{{ mode }}
 ```
@@ -45,10 +45,10 @@ build [target] [mode="release"]:
 ## Invocation examples
 
 ```bash
-please build api
-please build api debug
-please run build api debug --explain
-please build api -- --features json
+broski build api
+broski build api debug
+broski run build api debug --explain
+broski build api -- --features json
 ```
 
 ## Binding rules
@@ -61,12 +61,12 @@ please build api -- --features json
 
 ## Dependencies and graph behavior
 
-```bash title="pleasefile"
+```bash title="broskifile"
 lint:
     @in src/**/*
-    @out .please/stamps/lint.ok
+    @out .broski/stamps/lint.ok
     cargo clippy --all-targets --all-features -- -D warnings
-    touch .please/stamps/lint.ok
+    touch .broski/stamps/lint.ok
 
 build [target]: lint
     @in src/**/* Cargo.toml Cargo.lock
@@ -81,7 +81,7 @@ build [target]: lint
 
 Tasks can start with shebang bodies.
 
-```bash title="pleasefile"
+```bash title="broskifile"
 validate-json [path]:
     #!/usr/bin/env python3
     import json, pathlib, sys
@@ -94,14 +94,14 @@ Use this when inline shell becomes hard to maintain.
 
 ## Make and Just migration mapping
 
-### Make variables -> Please params
+### Make variables -> Broski params
 
 ```makefile title="Makefile"
 build:
     cargo build --bin $(TARGET)
 ```
 
-```bash title="pleasefile"
+```bash title="broskifile"
 build [target]:
     @in src/**/* Cargo.toml
     @out dist/{{ target }}
@@ -111,17 +111,17 @@ build [target]:
 Run:
 
 ```bash
-please build api
+broski build api
 ```
 
-### Just recipe args -> Please params
+### Just recipe args -> Broski params
 
 ```makefile title="justfile"
 build target mode="release":
   cargo build --bin {{target}} --{{mode}}
 ```
 
-```bash title="pleasefile"
+```bash title="broskifile"
 build [target] [mode="release"]:
     @in src/**/* Cargo.toml
     @out dist/{{ target }}
@@ -139,7 +139,7 @@ build [target] [mode="release"]:
 
 ### Pattern: split orchestration and leaf tasks
 
-```bash title="pleasefile"
+```bash title="broskifile"
 ci: lint test build
 
 build [target] [mode="release"]:
@@ -150,7 +150,7 @@ build [target] [mode="release"]:
 
 ### Pattern: dev task as interactive
 
-```bash title="pleasefile"
+```bash title="broskifile"
 dev:
     @mode interactive
     @requires docker

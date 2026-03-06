@@ -6,9 +6,9 @@ sidebar_position: 1
 
 Goal: run one deterministic task and inspect cache behavior in less than a minute.
 
-## 1) Create a minimal `pleasefile`
+## 1) Create a minimal `broskifile`
 
-```bash title="pleasefile"
+```bash title="broskifile"
 version = "0.5"
 
 build:
@@ -20,19 +20,19 @@ build:
 ## 2) Run the task
 
 ```bash
-please build
+broski build
 ```
 
 Expected outcome:
 
 - command executes successfully
 - outputs are written to `target/release`
-- execution metadata is recorded in `.please`
+- execution metadata is recorded in `.broski`
 
 ## 3) Run again with explain
 
 ```bash
-please run build --explain
+broski run build --explain
 ```
 
 Expected outcome:
@@ -44,7 +44,7 @@ Expected outcome:
 
 ```bash
 echo "// touch" >> src/main.rs
-please run build --explain
+broski run build --explain
 ```
 
 Expected outcome:
@@ -55,5 +55,5 @@ Expected outcome:
 Next:
 
 - [Install](./install)
-- [Your first pleasefile](./first-pleasefile)
-- [Make vs Just vs Please](./make-just-please)
+- [Your first broskifile](./first-broskifile)
+- [Make vs Just vs Broski](./make-just-broski)

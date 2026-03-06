@@ -26,11 +26,11 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            binary_name: please
+            binary_name: broski
             archive_ext: tar.gz
           - os: macos-14
             target: aarch64-apple-darwin
-            binary_name: please
+            binary_name: broski
             archive_ext: tar.gz
     runs-on: ${{ matrix.os }}
 
@@ -44,7 +44,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Build release binary
-        run: cargo build --release -p please-cli --target ${{ matrix.target }}
+        run: cargo build --release -p broski-cli --target ${{ matrix.target }}
 
       - name: Package artifact (Linux/macOS)
         shell: bash
@@ -55,10 +55,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          bin_path="target/${TARGET}/release/${BINARY_NAME}"
-          asset="please-${RELEASE_TAG}-${TARGET}.${ARCHIVE_EXT}"
-          tar -C "$(dirname "$bin_path")" -czf "dist/${asset}" "$(basename "$bin_path")"
-          echo "created dist/${asset}"
+          bro_bin="target/${TARGET}/release/broski"
+          bro_asset="broski-${RELEASE_TAG}-${TARGET}.${ARCHIVE_EXT}"
+          tar -C "$(dirname "$bro_bin")" -czf "dist/${bro_asset}" "$(basename "$bro_bin")"
+          echo "created dist/${bro_asset}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -83,7 +83,7 @@ jobs:
         run: |
           set -euo pipefail
           cd dist
-          sha256sum please-* > SHA256SUMS.txt
+          sha256sum broski-* > SHA256SUMS.txt
 
       - name: Create or update release
         uses: softprops/action-gh-release@v2
@@ -95,5 +95,5 @@ jobs:
           prerelease: ${{ contains(env.RELEASE_TAG, '-') }}
           fail_on_unmatched_files: true
           files: |
-            dist/please-*
+            dist/broski-*
             dist/SHA256SUMS.txt

@@ -4,7 +4,7 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Please Docs',
+  title: 'Broski Docs',
   tagline: 'Deterministic build orchestration for modern teams',
   favicon: 'img/favicon.svg',
 
@@ -12,8 +12,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://please-docs.vercel.app',
-  baseUrl: '/please_docs/',
+  url: 'https://broski-docs.vercel.app',
+  baseUrl: '/broski_docs/',
 
   onBrokenLinks: 'throw',
   i18n: {
@@ -37,8 +37,8 @@ const config: Config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/himudigonda/Please/tree/main/website/',
-          rehypePlugins: [[rehypeShiki, {themes: {light: 'github-light', dark: 'material-theme-palenight'}}]],
+          editUrl: 'https://github.com/himudigonda/Broski/tree/main/website/',
+          rehypePlugins: [[rehypeShiki, {themes: {light: 'github-light', dark: 'github-dark'}}]],
           lastVersion: 'current',
           versions: {
             current: {
@@ -52,7 +52,7 @@ const config: Config = {
         },
         blog: false,
         pages: {
-          rehypePlugins: [[rehypeShiki, {themes: {light: 'github-light', dark: 'material-theme-palenight'}}]],
+          rehypePlugins: [[rehypeShiki, {themes: {light: 'github-light', dark: 'github-dark'}}]],
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -81,9 +81,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Please Docs',
+      title: 'Broski Docs',
       logo: {
-        alt: 'Please Logo',
+        alt: 'Broski Logo',
         src: 'img/logo.svg',
       },
       items: [
@@ -98,13 +98,13 @@ const config: Config = {
           position: 'left',
           dropdownItemsAfter: [
             {
-              to: 'https://github.com/himudigonda/Please/tree/main/docs/legacy',
+              to: 'https://github.com/himudigonda/Broski/tree/main/docs/legacy',
               label: 'Legacy Markdown Archive',
             },
           ],
         },
         {
-          href: 'https://github.com/himudigonda/Please',
+          href: 'https://github.com/himudigonda/Broski',
           label: 'GitHub',
           position: 'right',
         },
@@ -129,8 +129,8 @@ const config: Config = {
         {
           title: 'Community',
           items: [
-            {label: 'GitHub', href: 'https://github.com/himudigonda/Please'},
-            {label: 'Issues', href: 'https://github.com/himudigonda/Please/issues'},
+            {label: 'GitHub', href: 'https://github.com/himudigonda/Broski'},
+            {label: 'Issues', href: 'https://github.com/himudigonda/Broski/issues'},
           ],
         },
         {

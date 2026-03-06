@@ -1,6 +1,6 @@
 # Examples
 
-This folder contains runnable `pleasefile` examples across languages and stacks.
+This folder contains runnable `broskifile` examples across languages and stacks.
 
 ## Included examples
 - `minimal`: smallest possible task contract.
@@ -14,11 +14,11 @@ This folder contains runnable `pleasefile` examples across languages and stacks.
 From repository root:
 
 ```bash
-please --workspace . run examples_smoke --explain
+broski --workspace . run examples_smoke --explain
 ```
 
 Run one example directly:
 
 ```bash
-cargo run -p please-cli -- --workspace examples/python-cli run ci --explain
+cargo run -p broski-cli -- --workspace examples/python-cli run ci --explain
 ```

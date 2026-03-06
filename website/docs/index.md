@@ -3,9 +3,9 @@ sidebar_position: 1
 slug: /
 ---
 
-# Please Docs
+# Broski Docs
 
-`Please` is a deterministic task runner and build orchestrator designed to replace Make/Just workflows for local and CI execution.
+`Broski` is a deterministic task runner and build orchestrator designed to replace Make/Just workflows for local and CI execution.
 
 <div className="eclipse-callout">
 <strong>Goal:</strong> move from fragile timestamp-based rebuilds to deterministic, explainable execution with cache telemetry.
@@ -13,10 +13,10 @@ slug: /
 
 ## Start Here
 
-1. [Install Please](quickstart/install)
-2. [Write your first pleasefile](quickstart/first-pleasefile)
-3. [Compare Make vs Just vs Please](quickstart/make-just-please)
-4. [Understand what problems Please solves](architecture/why-please)
+1. [Install Broski](quickstart/install)
+2. [Write your first broskifile](quickstart/first-broskifile)
+3. [Compare Make vs Just vs Broski](quickstart/make-just-broski)
+4. [Understand what problems Broski solves](architecture/why-broski)
 5. [Understand the execution model](architecture/engine-overview)
 6. [Use the migration playbook](operations/migration)
 

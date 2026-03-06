@@ -6,12 +6,12 @@ sidebar_position: 3
 
 Use this page when commands fail or behavior is unclear.
 
-## `please` command not found
+## `broski` command not found
 
 Run:
 
 ```bash
-please --version
+broski --version
 ```
 
 If command is missing:
@@ -27,7 +27,7 @@ Likely cause: task is interactive or contracts are incomplete.
 Check:
 
 ```bash
-please run <task> --explain
+broski run <task> --explain
 ```
 
 Fix:
@@ -38,7 +38,7 @@ Fix:
 
 ## Task fails with missing tool error
 
-If a task declares `@requires`, Please fails fast when a tool is missing.
+If a task declares `@requires`, Broski fails fast when a tool is missing.
 
 Fix:
 
@@ -66,11 +66,11 @@ Expected behavior:
 
 ## 404 on docs root URL
 
-If `/please_docs/` works but root does not:
+If `/broski_docs/` works but root does not:
 
 1. Confirm latest deployment uses current `main`.
 2. Redeploy docs project.
-3. Verify routing config from [`website/vercel.json`](https://github.com/himudigonda/Please/blob/main/website/vercel.json).
+3. Verify routing config from [`website/vercel.json`](https://github.com/himudigonda/Broski/blob/main/website/vercel.json).
 
 ## Need a full migration path
 

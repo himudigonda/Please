@@ -1,0 +1,9 @@
+version = "0.5"
+
+hello:
+    @in broskifile
+    @out .broski/stamps/hello.ok
+    @isolation off
+    mkdir -p .broski/stamps
+    echo 'hello from broski'
+    printf 'ok\n' > .broski/stamps/hello.ok

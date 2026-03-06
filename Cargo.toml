@@ -1,18 +1,18 @@
 [workspace]
 members = [
-  "crates/please-cli",
-  "crates/please-core",
-  "crates/please-cache",
-  "crates/please-store",
+  "crates/broski-cli",
+  "crates/broski-core",
+  "crates/broski-cache",
+  "crates/broski-store",
 ]
 resolver = "2"
 
 [workspace.package]
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 license = "MIT"
 authors = ["Himudigonda"]
-repository = "https://github.com/himudigonda/Please"
+repository = "https://github.com/himudigonda/Broski"
 
 [workspace.dependencies]
 aho-corasick = "1.1"

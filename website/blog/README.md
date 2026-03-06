@@ -1,3 +1,3 @@
 # Blog Disabled
 
-Please docs ship as product docs only. Blog remains disabled.
+Broski docs ship as product docs only. Blog remains disabled.

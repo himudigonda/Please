@@ -1,17 +1,17 @@
-# Contributing to Please
+# Contributing to Broski
 
 ## Repository layout
-- `crates/please-cli`: CLI and command routing.
-- `crates/please-core`: DSL parser, graph, fingerprinting, executor.
-- `crates/please-store`: shared cache record types/traits.
-- `crates/please-cache`: local SQLite + CAS implementation.
+- `crates/broski-cli`: CLI and command routing.
+- `crates/broski-core`: DSL parser, graph, fingerprinting, executor.
+- `crates/broski-store`: shared cache record types/traits.
+- `crates/broski-cache`: local SQLite + CAS implementation.
 - `examples/showcase`: React + Rust + Docker demonstration.
 
 ## Local setup
 ```bash
-git clone https://github.com/himudigonda/Please.git
-cd Please
-cargo build --release -p please-cli
+git clone https://github.com/himudigonda/Broski.git
+cd Broski
+cargo build --release -p broski-cli
 ```
 
 ## Required quality gate
@@ -20,7 +20,7 @@ Run before every PR:
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace
-./target/release/please --workspace . run ci
+./target/release/broski --workspace . run ci
 ```
 
 ## CI policy
@@ -34,7 +34,7 @@ cargo test --workspace
 - Linux strict isolation is validated in dedicated tests/jobs.
 
 ## Release references
-- Docs Portal: <https://himudigonda.me/please_docs/>
+- Docs Portal: <https://himudigonda.me/broski_docs/>
 - Docs source: `website/`
 - Legacy markdown archive: `docs/legacy/`
 

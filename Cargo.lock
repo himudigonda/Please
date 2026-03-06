@@ -172,6 +172,73 @@ dependencies = [
 ]
 
 [[package]]
+name = "broski-cache"
+version = "0.5.1"
+dependencies = [
+ "anyhow",
+ "blake3",
+ "broski-store",
+ "rusqlite",
+ "serde_json",
+ "tempfile",
+ "walkdir",
+]
+
+[[package]]
+name = "broski-cli"
+version = "0.5.1"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "broski-cache",
+ "broski-core",
+ "broski-store",
+ "clap",
+ "miette",
+ "predicates",
+ "tempfile",
+ "which",
+]
+
+[[package]]
+name = "broski-core"
+version = "0.5.1"
+dependencies = [
+ "aho-corasick",
+ "anyhow",
+ "blake3",
+ "broski-cache",
+ "broski-store",
+ "criterion",
+ "glob",
+ "indicatif",
+ "libc",
+ "miette",
+ "notify",
+ "num_cpus",
+ "petgraph",
+ "rayon",
+ "reflink-copy",
+ "serde",
+ "serde_json",
+ "shell-words",
+ "tempfile",
+ "thiserror",
+ "toml",
+ "walkdir",
+ "which",
+ "winnow",
+]
+
+[[package]]
+name = "broski-store"
+version = "0.5.1"
+dependencies = [
+ "anyhow",
+ "serde",
+]
+
+[[package]]
 name = "bstr"
 version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -861,73 +928,6 @@ name = "pkg-config"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
-
-[[package]]
-name = "please-cache"
-version = "0.5.0"
-dependencies = [
- "anyhow",
- "blake3",
- "please-store",
- "rusqlite",
- "serde_json",
- "tempfile",
- "walkdir",
-]
-
-[[package]]
-name = "please-cli"
-version = "0.5.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "clap",
- "miette",
- "please-cache",
- "please-core",
- "please-store",
- "predicates",
- "tempfile",
- "which",
-]
-
-[[package]]
-name = "please-core"
-version = "0.5.0"
-dependencies = [
- "aho-corasick",
- "anyhow",
- "blake3",
- "criterion",
- "glob",
- "indicatif",
- "libc",
- "miette",
- "notify",
- "num_cpus",
- "petgraph",
- "please-cache",
- "please-store",
- "rayon",
- "reflink-copy",
- "serde",
- "serde_json",
- "shell-words",
- "tempfile",
- "thiserror",
- "toml",
- "walkdir",
- "which",
- "winnow",
-]
-
-[[package]]
-name = "please-store"
-version = "0.5.0"
-dependencies = [
- "anyhow",
- "serde",
-]
 
 [[package]]
 name = "plotters"

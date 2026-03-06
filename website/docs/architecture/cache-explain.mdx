@@ -7,7 +7,7 @@ sidebar_position: 2
 Use `--explain` to understand why a graph task reran.
 
 ```bash
-please run build --explain
+broski run build --explain
 ```
 
 ```mermaid
@@ -34,10 +34,10 @@ Typical reasons include:
 5. Verify exactly one expected miss reason appears.
 
 ```bash
-please run build
-please run build --explain
+broski run build
+broski run build --explain
 echo "// change" >> src/main.rs
-please run build --explain
+broski run build --explain
 ```
 
 ## Secret handling

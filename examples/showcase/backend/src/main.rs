@@ -45,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
         .and_then(|value| value.parse::<u16>().ok())
         .unwrap_or(8080);
 
-    let state = AppState { service_name: "please-showcase".to_string() };
+    let state = AppState { service_name: "broski-showcase".to_string() };
 
     let app = Router::new()
         .route("/api/health", get(health))

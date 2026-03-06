@@ -2,7 +2,7 @@
 
 # Ignore generated/build/cache folders, binary archives, media assets, and logs.
 # Keep key source files, including website and Rust config/source files.
-IGNORE_PATTERN="(target|cache|dist|node_modules|build|artifacts|\.docusaurus|\.please|\.git|\.lock|package-lock\.json|\.zip|\.tar|\.gz|\.pyc|\.o|\.a|\.d|\.bin|\.tag|\.log$|\.tmp$|\.map$|\.svg$|\.png$|\.jpg$|\.jpeg$|\.gif$|\.webp$|\.ico$|\.pdf$|\.DS_Store$)"
+IGNORE_PATTERN="(target|cache|dist|node_modules|build|artifacts|\.docusaurus|\.broski|\.git|\.lock|package-lock\.json|\.zip|\.tar|\.gz|\.pyc|\.o|\.a|\.d|\.bin|\.tag|\.log$|\.tmp$|\.map$|\.svg$|\.png$|\.jpg$|\.jpeg$|\.gif$|\.webp$|\.ico$|\.pdf$|\.DS_Store$)"
 
 # Dump contents
 find . -type f | grep -vE "$IGNORE_PATTERN" | sort | while read -r file; do
@@ -14,9 +14,9 @@ find . -type f | grep -vE "$IGNORE_PATTERN" | sort | while read -r file; do
     echo "========================================"
     cat "$file"
     echo -e "\n"
-done > /tmp/please_dump.txt
+done > /tmp/broski_dump.txt
 
-cat /tmp/please_dump.txt
+cat /tmp/broski_dump.txt
 
 # Calculate stats
 echo "====================================================================="
@@ -33,7 +33,7 @@ find . -type f | grep -vE "$IGNORE_PATTERN" | sort | while read -r file; do
 done
 
 echo "---------------------------------------------------------------------"
-echo "TOTALS: $(wc -l < /tmp/please_dump.txt | tr -d ' ') Lines, $(wc -w < /tmp/please_dump.txt | tr -d ' ') Words, $(wc -m < /tmp/please_dump.txt | tr -d ' ') Chars"
+echo "TOTALS: $(wc -l < /tmp/broski_dump.txt | tr -d ' ') Lines, $(wc -w < /tmp/broski_dump.txt | tr -d ' ') Words, $(wc -m < /tmp/broski_dump.txt | tr -d ' ') Chars"
 echo "====================================================================="
 
-rm -f /tmp/please_dump.txt
+rm -f /tmp/broski_dump.txt
