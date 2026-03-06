@@ -340,8 +340,7 @@ fn copy_tree(src: &Path, dest: &Path) -> Result<()> {
             fs::create_dir_all(parent)
                 .with_context(|| format!("creating directory '{}'", parent.display()))?;
         }
-        fs::copy(src, dest)
-            .with_context(|| format!("copying file '{}' -> '{}'", src.display(), dest.display()))?;
+        copy_file_with_reflink_fallback(src, dest)?;
         return Ok(());
     }
 
@@ -369,9 +368,7 @@ fn copy_tree(src: &Path, dest: &Path) -> Result<()> {
                     fs::create_dir_all(parent)
                         .with_context(|| format!("creating directory '{}'", parent.display()))?;
                 }
-                fs::copy(child, &target).with_context(|| {
-                    format!("copying file '{}' -> '{}'", child.display(), target.display())
-                })?;
+                copy_file_with_reflink_fallback(child, &target)?;
             }
         }
 
@@ -382,6 +379,18 @@ fn copy_tree(src: &Path, dest: &Path) -> Result<()> {
         "cannot copy path '{}' because it is neither a file nor a directory",
         src.display()
     ))
+}
+
+fn copy_file_with_reflink_fallback(src: &Path, dest: &Path) -> Result<()> {
+    match reflink_copy::reflink(src, dest) {
+        Ok(()) => Ok(()),
+        Err(_) => {
+            fs::copy(src, dest).with_context(|| {
+                format!("copying file '{}' -> '{}'", src.display(), dest.display())
+            })?;
+            Ok(())
+        }
+    }
 }
 
 fn remove_path_if_exists(path: &Path) -> Result<()> {
