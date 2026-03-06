@@ -34,21 +34,11 @@ const config: Config = {
     [
       'classic',
       {
-          docs: {
-            routeBasePath: '/',
-            sidebarPath: './sidebars.ts',
-            editUrl: 'https://github.com/himudigonda/Broski/tree/main/website/',
-            rehypePlugins: [[rehypeShiki, {themes: {light: 'ayu-light', dark: 'ayu-dark'}}]],
-            lastVersion: 'current',
-            versions: {
-              current: {
-                label: 'v0.5',
-            },
-            'v0.4': {
-              label: 'v0.4 (archived)',
-              path: 'v0.4',
-            },
-          },
+        docs: {
+          routeBasePath: '/',
+          sidebarPath: './sidebars.ts',
+          editUrl: 'https://github.com/himudigonda/Broski/tree/main/website/',
+          rehypePlugins: [[rehypeShiki, {themes: {light: 'ayu-light', dark: 'ayu-dark'}}]],
         },
         blog: false,
         pages: {
@@ -75,7 +65,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/og-eclipse.png',
+    image: 'img/branding/broski_banner.png',
     colorMode: {
       defaultMode: 'light',
       respectPrefersColorScheme: true,
@@ -84,7 +74,7 @@ const config: Config = {
       title: 'Broski Docs',
       logo: {
         alt: 'Broski Logo',
-        src: 'img/logo.svg',
+        src: 'img/branding/broski_logo_base.png',
       },
       items: [
         {
@@ -92,16 +82,6 @@ const config: Config = {
           sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Docs',
-        },
-        {
-          type: 'docsVersionDropdown',
-          position: 'left',
-          dropdownItemsAfter: [
-            {
-              to: 'https://github.com/himudigonda/Broski/tree/main/docs/legacy',
-              label: 'Legacy Markdown Archive',
-            },
-          ],
         },
         {
           href: 'https://github.com/himudigonda/Broski',

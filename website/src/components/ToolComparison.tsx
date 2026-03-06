@@ -4,26 +4,26 @@ import CodeBlock from '@theme/CodeBlock';
 import React from 'react';
 
 type Props = {
-  pleaseCode: string;
+  broskiCode: string;
   makeCode: string;
   justCode: string;
-  pleaseLanguage?: string;
+  broskiLanguage?: string;
   makeLanguage?: string;
   justLanguage?: string;
 };
 
 export default function ToolComparison({
-  pleaseCode,
+  broskiCode,
   makeCode,
   justCode,
-  pleaseLanguage = 'bash',
+  broskiLanguage = 'bash',
   makeLanguage = 'makefile',
   justLanguage = 'makefile',
 }: Props): JSX.Element {
   return (
     <Tabs groupId="tool-compare" queryString>
       <TabItem value="broski" label="Broski">
-        <CodeBlock language={pleaseLanguage}>{pleaseCode}</CodeBlock>
+        <CodeBlock language={broskiLanguage}>{broskiCode}</CodeBlock>
       </TabItem>
       <TabItem value="make" label="Make">
         <CodeBlock language={makeLanguage}>{makeCode}</CodeBlock>

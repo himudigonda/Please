@@ -4,18 +4,16 @@ set -euo pipefail
 print_usage() {
   cat <<'EOF'
 Usage:
-  ./uninstall.sh [--yes] [--purge-state] [--purge-please]
+  ./uninstall.sh [--yes] [--purge-state]
 
 Options:
   --yes            Skip confirmation prompts.
   --purge-state    Remove all ~/.broski cache/tx/stage directories.
-  --purge-please   Remove legacy ~/.please directories (if present).
 EOF
 }
 
 ASSUME_YES=false
 PURGE_STATE=false
-PURGE_PLEASE=false
 
 for arg in "${@:-}"; do
   case "$arg" in
@@ -24,9 +22,6 @@ for arg in "${@:-}"; do
       ;;
     --purge-state)
       PURGE_STATE=true
-      ;;
-    --purge-please)
-      PURGE_PLEASE=true
       ;;
     --help|-h)
       print_usage
@@ -91,11 +86,6 @@ declare -a BINARY_DIRS=(
 for dir in "${BINARY_DIRS[@]}"; do
   if [ -d "$dir" ]; then
     remove_file_if_exists "$dir/broski"
-    if [ "$PURGE_PLEASE" = true ]; then
-      if [ -e "$dir/please" ]; then
-        remove_file_if_exists "$dir/please"
-      fi
-    fi
   fi
 done
 
@@ -107,12 +97,6 @@ fi
 
 if prompt_yes_no "Purge user cache at ~/.cache/broski"; then
   remove_dir_if_exists "$HOME/.cache/broski"
-fi
-
-if [ "$PURGE_PLEASE" = true ]; then
-  if prompt_yes_no "Purge legacy ~/.please"; then
-    remove_dir_if_exists "$HOME/.please"
-  fi
 fi
 
 if command -v cargo >/dev/null 2>&1; then

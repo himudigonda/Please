@@ -1,5 +1,7 @@
 # Broski
 
+![Broski Banner](website/static/img/branding/broski_banner.png)
+
 [![Version](https://img.shields.io/badge/version-v0.5.1-blue)](https://github.com/himudigonda/Broski/releases/tag/v0.5.1)
 [![CI](https://img.shields.io/github/actions/workflow/status/himudigonda/Broski/ci.yml?branch=main&label=build)](https://github.com/himudigonda/Broski/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
@@ -51,14 +53,12 @@ broski --workspace . run test --watch
 - decorators (`@private`, `@confirm`)
 - built-in interpolation (`os()`, `arch()`, `env()`)
 - shebang task bodies
-- compatibility retained: DSL `0.3`/`0.4` and TOML (deprecated; removal target `v0.6`)
 
 ## Repo Layout
 
 - `crates/` — core engine, CLI, cache, store
 - `broskifile` — dogfooding orchestration
 - `website/` — docs portal (Docusaurus)
-- `docs/legacy/` — archived markdown docs
 - `examples/` — runnable end-to-end samples
 
 ## Developer Workflow

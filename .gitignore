@@ -1,5 +1,6 @@
 /target
 /.broski
+.DS_Store
 **/*.profraw
 **/*.profdata
 test_project/

@@ -5,22 +5,11 @@ All notable changes to this project are documented in this file.
 ## [0.5.1] - 2026-03-05
 
 ### Changed
-- Hard-cut rename completion:
-  - `pleasefile` removed from active paths, `broskifile` only.
-  - `.please` runtime paths removed from active execution flow, `.broski` only.
-  - `PLEASE_*` aliases removed, `BROSKI_*` only.
-  - legacy `please` binary alias removed from release/install paths.
-- Installer default repository target switched to `himudigonda/Broski`.
-- Release packaging streamlined to publish `broski-*` artifacts only.
-- Docs routing and naming aligned to `broski`:
-  - canonical docs path is `/broski_docs/`.
-  - category/file IDs aligned to avoid route 404s.
-- Visual theme contrast updated for clearer code readability in light/dark modes.
-
-### Added
-- `tree.md` execution tree tracking for migration attempts and branch flow.
-- `progress.md` detailed subsystem progress and gate status tracking.
-- `scripts/ci_local.sh` single-runner local quality gate sequence.
+- Installer and release flow now use `broski-*` artifacts only.
+- Docs route is canonical at `/broski_docs/`.
+- Docs and README now use the new Broski banner/logo assets.
+- CI and docs CI auto-run only on pushes to `main` (manual dispatch still available).
+- Docs deploy workflow uses the correct Vercel execution path.
 
 ## [0.5.0] - 2026-03-05
 
@@ -49,7 +38,6 @@ All notable changes to this project are documented in this file.
 - Root and all `examples/**/broskifile` files migrated to `version = "0.5"`.
 - CLI parser + diagnostics now surface richer miette-backed source-span errors.
 - Release/CI docs and runbook updated for stable `v0.5.0`.
-- Legacy markdown docs moved to `docs/legacy` to preserve historical release context.
 
 ### Compatibility
 - TOML and DSL `0.3`/`0.4` continue to work in v0.5 with deprecation warnings.

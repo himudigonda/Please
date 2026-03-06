@@ -24,10 +24,10 @@ Broski keeps simple task authoring while adding deterministic cache keys, explai
 ### Define a build task
 
 <ToolComparison
-  pleaseLanguage="bash"
+  broskiLanguage="bash"
   makeLanguage="makefile"
   justLanguage="makefile"
-  pleaseCode={`build [target] [mode="release"]:\n    @in src/**/* Cargo.toml\n    @out dist/{{ target }}\n    @requires cargo\n    cargo build --bin {{ target }} --{{ mode }}`}
+  broskiCode={`build [target] [mode="release"]:\n    @in src/**/* Cargo.toml\n    @out dist/{{ target }}\n    @requires cargo\n    cargo build --bin {{ target }} --{{ mode }}`}
   makeCode={`build:\n\tcargo build --release`}
   justCode={`build target mode=\"release\":\n  cargo build --bin {{target}} --{{mode}}`}
 />
@@ -35,10 +35,10 @@ Broski keeps simple task authoring while adding deterministic cache keys, explai
 ### Add a local dev task
 
 <ToolComparison
-  pleaseLanguage="bash"
+  broskiLanguage="bash"
   makeLanguage="makefile"
   justLanguage="makefile"
-  pleaseCode={`dev:\n    @mode interactive\n    npm run dev`}
+  broskiCode={`dev:\n    @mode interactive\n    npm run dev`}
   makeCode={`dev:\n\tnpm run dev`}
   justCode={`dev:\n  npm run dev`}
 />
@@ -46,10 +46,10 @@ Broski keeps simple task authoring while adding deterministic cache keys, explai
 ### Trigger with arguments
 
 <ToolComparison
-  pleaseLanguage="bash"
+  broskiLanguage="bash"
   makeLanguage="makefile"
   justLanguage="makefile"
-  pleaseCode={`broski build api debug\nplease run build --explain`}
+  broskiCode={`broski build api debug\nbroski run build --explain`}
   makeCode={`make build TARGET=api MODE=debug`}
   justCode={`just build api debug`}
 />

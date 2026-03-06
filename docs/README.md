@@ -1,8 +1,8 @@
-# Legacy Markdown Archive
+# Documentation
 
-This folder contains legacy markdown documentation snapshots retained for historical context.
+This folder is intentionally minimal after the hard-cut cleanup.
 
-Current product docs live in `website/` and are published via the Docs Portal:
+Current product docs live in `website/` and are published via:
 
 - https://broski-docs.vercel.app/broski_docs/
 - https://himudigonda.me/broski_docs/
