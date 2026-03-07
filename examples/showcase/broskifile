@@ -15,7 +15,7 @@ build_api:
     cargo build --release --manifest-path backend/Cargo.toml
 
 package_container: build_ui build_api
-    @in Dockerfile frontend/dist/**/* backend/target/release/showcase-server
+    @in Dockerfile frontend/dist backend/target/release/showcase-server
     @out artifacts/showcase-image.tar
     @isolation off
     mkdir -p artifacts

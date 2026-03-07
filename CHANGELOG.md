@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.6.1] - 2026-03-07
+
+### Stabilization
+- Validated `0.6.0` integration with full quality gates (`fmt`, `clippy`, workspace tests, docs build).
+- Completed benchmark and smoke validation before release cut.
+
+### Documentation and Positioning
+- Repositioned README and quickstart docs around low-ceremony adoption: copy commands first, then add `@in` and `@out` for caching.
+- Promoted `--explain` and rollback-safe output promotion as the primary differentiators.
+- Added a `Progressive Adoption` section in the migration guide for Make/Just users.
+
+### Hygiene
+- Renamed `examples/basic/pleasefile` to `examples/basic/broskifile` to remove legacy naming drift.
+
+### CI / Release Finalization
+- Fixed showcase CI packaging contracts so `package_container` reliably resolves built artifacts in GitHub Actions.
+- Fixed markdown lint spacing in quickstart docs (`MD032`) to keep `docs-ci` green.
+
 ## [0.5.2] - 2026-03-06
 
 ### Security
